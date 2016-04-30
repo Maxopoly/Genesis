@@ -1,0 +1,384 @@
+package com.github.maxopoly.Genesis;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
+import org.bukkit.DyeColor;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Horse;
+import org.bukkit.entity.Ocelot;
+import org.bukkit.entity.Rabbit;
+import org.bukkit.entity.Wolf;
+import org.bukkit.inventory.ItemStack;
+
+import vg.civcraft.mc.civmodcore.itemHandling.ItemMap;
+import static vg.civcraft.mc.civmodcore.util.ConfigParsing.parseItemMapDirectly;
+
+import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
+import com.github.maxopoly.Genesis.combatEffects.EffectCause;
+import com.github.maxopoly.Genesis.entities.GenesisLivingEntity;
+import com.github.maxopoly.Genesis.entities.ambient.GenesisBat;
+import com.github.maxopoly.Genesis.entities.ambient.GenesisSquid;
+import com.github.maxopoly.Genesis.entities.animals.GenesisChicken;
+import com.github.maxopoly.Genesis.entities.animals.GenesisCow;
+import com.github.maxopoly.Genesis.entities.animals.GenesisHorse;
+import com.github.maxopoly.Genesis.entities.animals.GenesisMushroomCow;
+import com.github.maxopoly.Genesis.entities.animals.GenesisOcelot;
+import com.github.maxopoly.Genesis.entities.animals.GenesisPig;
+import com.github.maxopoly.Genesis.entities.animals.GenesisRabbit;
+import com.github.maxopoly.Genesis.entities.animals.GenesisSheep;
+import com.github.maxopoly.Genesis.entities.animals.GenesisWolf;
+import com.github.maxopoly.Genesis.entities.hostile.GenesisBlaze;
+import com.github.maxopoly.Genesis.entities.hostile.GenesisCaveSpider;
+import com.github.maxopoly.Genesis.entities.hostile.GenesisCreeper;
+import com.github.maxopoly.Genesis.entities.hostile.GenesisEnderman;
+import com.github.maxopoly.Genesis.entities.hostile.GenesisSpider;
+import com.github.maxopoly.Genesis.entities.hostile.human.GenesisSkeleton;
+import com.github.maxopoly.Genesis.entities.hostile.human.GenesisZombie;
+import com.github.maxopoly.Genesis.entities.hostile.human.GenesisZombiePigman;
+import com.github.maxopoly.Genesis.entities.splitables.GenesisMagmaCube;
+import com.github.maxopoly.Genesis.entities.splitables.GenesisSlime;
+
+public class ConfigParser {
+
+	private Genesis plugin;
+
+	public ConfigParser(Genesis plugin) {
+		this.plugin = plugin;
+	}
+
+	public void parse() {
+		plugin.info("Loading Genesis config");
+		plugin.saveDefaultConfig();
+		plugin.reloadConfig();
+		FileConfiguration config = plugin.getConfig();
+		parseEntities(config.getConfigurationSection("entities"));
+	}
+
+	public void parseEntities(ConfigurationSection config) {
+		if (config == null) {
+			plugin.warning("No entities specified in config");
+			return;
+		}
+		for (String key : config.getKeys(false)) {
+			ConfigurationSection current = config.getConfigurationSection(key);
+			if (current == null) {
+				plugin.warning("Invalid value found at "
+						+ config.getCurrentPath() + "." + key
+						+ ". Only config sections allowed on this level");
+				continue;
+			}
+
+			GenesisLivingEntity result = null;
+
+			// parse general stuff that applies for every entity
+			String typeString = current.getString("type");
+			if (typeString == null) {
+				plugin.warning("No entity type specified at "
+						+ current.getCurrentPath() + ". Skipping it.");
+				continue;
+			}
+			EntityType type = EntityType.fromName(typeString);
+			if (type == null) {
+				plugin.warning("Invalid entity type specified at "
+						+ current.getCurrentPath() + ": " + typeString
+						+ ".Skipping it.");
+				continue;
+			}
+			String uniqueTag = current.getString("tag");
+			if (uniqueTag == null) {
+				plugin.warning("No unique tag specified at "
+						+ current.getCurrentPath() + ". Skipping it.");
+				continue;
+			}
+			String customName = current.getString("customName");
+
+			Map<EffectCause, List<CombatEffect>> effects = parseCombatEffects(current
+					.getConfigurationSection("effects"));
+			switch (type) {
+			// normal hostiles
+			case CREEPER:
+				boolean isPowered = current.getBoolean("powered", false);
+				result = new GenesisCreeper(uniqueTag, customName, effects,
+						isPowered);
+				break;
+			case BLAZE:
+				result = new GenesisBlaze(uniqueTag, customName, effects);
+				break;
+			case CAVE_SPIDER:
+				result = new GenesisCaveSpider(uniqueTag, customName, effects);
+				break;
+			case ENDERMAN:
+				result = new GenesisEnderman(uniqueTag, customName, effects);
+				break;
+			case SPIDER:
+				result = new GenesisSpider(uniqueTag, customName, effects);
+				break;
+			// ambient
+			case SQUID:
+				result = new GenesisSquid(uniqueTag, customName, effects);
+				break;
+			case BAT:
+				result = new GenesisBat(uniqueTag, customName, effects);
+				break;
+			// human entities
+			case ZOMBIE:
+			case SKELETON:
+			case PIG_ZOMBIE:
+				boolean canPickupItems = current.getBoolean("canPickupItems",
+						false);
+				ItemStack helmet = null;
+				ItemStack chestPlate = null;
+				ItemStack leggings = null;
+				ItemStack boots = null;
+				ItemStack hand = null;
+				double helmetDropChance = 0.0;
+				double chestPlateDropChance = 0.0;
+				double leggingsDropChance = 0.0;
+				double bootsDropChance = 0.0;
+				double handDropChance = 0.0;
+				ItemMap helmetMap = parseItemMapDirectly(current
+						.getConfigurationSection("helmet"));
+				if (helmetMap.getTotalItemAmount() != 0) {
+					helmet = helmetMap.getItemStackRepresentation().get(0);
+					helmetDropChance = current
+							.getConfigurationSection("helmet").getDouble(
+									"dropChance", 0.0);
+				}
+				ItemMap chestPlateMap = parseItemMapDirectly(current
+						.getConfigurationSection("chestPlate"));
+				if (chestPlateMap.getTotalItemAmount() != 0) {
+					chestPlate = chestPlateMap.getItemStackRepresentation()
+							.get(0);
+					chestPlateDropChance = current.getConfigurationSection(
+							"chestPlate").getDouble("dropChance", 0.0);
+				}
+				ItemMap leggingsMap = parseItemMapDirectly(current
+						.getConfigurationSection("leggings"));
+				if (leggingsMap.getTotalItemAmount() != 0) {
+					leggings = leggingsMap.getItemStackRepresentation().get(0);
+					leggingsDropChance = current.getConfigurationSection(
+							"leggings").getDouble("dropChance", 0.0);
+				}
+				ItemMap bootsMap = parseItemMapDirectly(current
+						.getConfigurationSection("boots"));
+				if (bootsMap.getTotalItemAmount() != 0) {
+					boots = bootsMap.getItemStackRepresentation().get(0);
+					bootsDropChance = current.getConfigurationSection("boots")
+							.getDouble("dropChance", 0.0);
+				}
+				ItemMap handMap = parseItemMapDirectly(current
+						.getConfigurationSection("hand"));
+				if (handMap.getTotalItemAmount() != 0) {
+					hand = handMap.getItemStackRepresentation().get(0);
+					handDropChance = current.getConfigurationSection("hand")
+							.getDouble("dropChance", 0.0);
+				}
+				if (type == EntityType.SKELETON) {
+					boolean wither = current
+							.getBoolean("witherSkeleton", false);
+					result = new GenesisSkeleton(uniqueTag, customName,
+							effects, helmet, chestPlate, leggings, boots, hand,
+							helmetDropChance, chestPlateDropChance,
+							leggingsDropChance, bootsDropChance,
+							handDropChance, canPickupItems, wither);
+				} else {
+					boolean child = current.getBoolean("child", false);
+					if (type == EntityType.PIG_ZOMBIE) {
+						int initialAnger = current.getInt("initialAnger", 0);
+						result = new GenesisZombiePigman(uniqueTag, customName,
+								effects, helmet, chestPlate, leggings, boots,
+								hand, helmetDropChance, chestPlateDropChance,
+								leggingsDropChance, bootsDropChance,
+								handDropChance, canPickupItems, child,
+								initialAnger);
+					} else { // Zombie
+						result = new GenesisZombie(uniqueTag, customName,
+								effects, helmet, chestPlate, leggings, boots,
+								hand, helmetDropChance, chestPlateDropChance,
+								leggingsDropChance, bootsDropChance,
+								handDropChance, canPickupItems, child);
+					}
+				}
+				break;
+			//animals
+			case CHICKEN: case COW: case HORSE: case MUSHROOM_COW: case OCELOT: case PIG: case RABBIT: case WOLF: case SHEEP:
+				boolean ageLocked = current.getBoolean("ageLocked", false);
+				boolean isBaby = current.getBoolean("child", false);
+				switch (type) {
+				case CHICKEN:
+					result = new GenesisChicken(uniqueTag, customName, effects, ageLocked, isBaby);
+					break;
+				case COW:
+					result = new GenesisCow(uniqueTag, customName, effects, ageLocked, isBaby);
+					break;
+				case HORSE:
+					Map <String, Double> color = parseDynamicChanceMap(current, "color");
+					Map <Horse.Color, Double> colors = new TreeMap<Horse.Color, Double>();
+					for(Entry <String, Double> entry : color.entrySet()) {
+						Horse.Color tempCol;
+						try {
+							tempCol  = Horse.Color.valueOf(entry.getKey());	
+						}
+						catch (IllegalArgumentException e) {
+							plugin.warning(entry.getKey() + " is not a valid horse color at " + current.getCurrentPath());
+							continue;
+						}
+						colors.put(tempCol, entry.getValue());
+					}
+					Map <String, Double> style = parseDynamicChanceMap(current, "style");
+					Map <Horse.Style, Double> styles = new TreeMap<Horse.Style, Double>();
+					for(Entry <String, Double> entry : style.entrySet()) {
+						Horse.Style tempCol;
+						try {
+							tempCol  = Horse.Style.valueOf(entry.getKey());	
+						}
+						catch (IllegalArgumentException e) {
+							plugin.warning(entry.getKey() + " is not a valid horse style at " + current.getCurrentPath());
+							continue;
+						}
+						styles.put(tempCol, entry.getValue());
+					}
+					Map <String, Double> variant = parseDynamicChanceMap(current, "variant");
+					Map <Horse.Variant, Double> variants = new TreeMap<Horse.Variant, Double>();
+					for(Entry <String, Double> entry : variant.entrySet()) {
+						Horse.Variant tempCol;
+						try {
+							tempCol  = Horse.Variant.valueOf(entry.getKey());	
+						}
+						catch (IllegalArgumentException e) {
+							plugin.warning(entry.getKey() + " is not a valid horse color at " + current.getCurrentPath());
+							continue;
+						}
+						variants.put(tempCol, entry.getValue());
+					}
+					boolean hasChest = current.getBoolean("hasChest", false);
+					int maximumDomestication = current.getInt("maximumDomestication", -1);
+					result = new GenesisHorse(uniqueTag, customName, effects, ageLocked, isBaby, colors, styles, variants, hasChest, maximumDomestication);
+					break;
+				case MUSHROOM_COW:
+					result = new GenesisMushroomCow(uniqueTag, customName, effects, ageLocked, isBaby);
+					break;
+				case OCELOT:
+					Map <String, Double> oceTypes = parseDynamicChanceMap(current, "type");
+					Map <Ocelot.Type, Double> oceType = new TreeMap<Ocelot.Type, Double>();
+					for(Entry <String, Double> entry : oceTypes.entrySet()) {
+						Ocelot.Type tempCol;
+						try {
+							tempCol  = Ocelot.Type.valueOf(entry.getKey());	
+						}
+						catch (IllegalArgumentException e) {
+							plugin.warning(entry.getKey() + " is not a valid ocelote type at " + current.getCurrentPath());
+							continue;
+						}
+						oceType.put(tempCol, entry.getValue());
+					}
+					result = new GenesisOcelot(uniqueTag, customName, effects, ageLocked, isBaby, oceType);
+					break;
+				case PIG:
+					boolean hasSaddle = current.getBoolean("hasSaddle", false);
+					result = new GenesisPig(uniqueTag, customName, effects, ageLocked, isBaby, hasSaddle);
+					break;
+				case RABBIT:
+					Map <String, Double> rabbitTypes = parseDynamicChanceMap(current, "type");
+					Map <Rabbit.Type, Double> rabbitType = new TreeMap<Rabbit.Type, Double>();
+					for(Entry <String, Double> entry : rabbitTypes.entrySet()) {
+						Rabbit.Type tempCol;
+						try {
+							tempCol  = Rabbit.Type.valueOf(entry.getKey());	
+						}
+						catch (IllegalArgumentException e) {
+							plugin.warning(entry.getKey() + " is not a valid rabbit type at " + current.getCurrentPath());
+							continue;
+						}
+						rabbitType.put(tempCol, entry.getValue());
+					}
+					result = new GenesisRabbit(uniqueTag, customName, effects, ageLocked, isBaby, rabbitType);
+					break;
+				case WOLF:
+					Map <String, Double> dogColors = parseDynamicChanceMap(current, "collarColor");
+					Map <DyeColor, Double> dogColor = new TreeMap<DyeColor, Double>();
+					for(Entry <String, Double> entry : dogColors.entrySet()) {
+						DyeColor tempCol;
+						try {
+							tempCol  = DyeColor.valueOf(entry.getKey());	
+						}
+						catch (IllegalArgumentException e) {
+							plugin.warning(entry.getKey() + " is not a valid rabbit type at " + current.getCurrentPath());
+							continue;
+						}
+						dogColor.put(tempCol, entry.getValue());
+					}
+					result = new GenesisWolf(uniqueTag, customName, effects, ageLocked, isBaby, dogColor);
+					break;
+				case SHEEP:
+					Map <String, Double> sheepColors = parseDynamicChanceMap(current, "collarColor");
+					Map <DyeColor, Double> sheepColor = new TreeMap<DyeColor, Double>();
+					for(Entry <String, Double> entry : sheepColors.entrySet()) {
+						DyeColor tempCol;
+						try {
+							tempCol  = DyeColor.valueOf(entry.getKey());	
+						}
+						catch (IllegalArgumentException e) {
+							plugin.warning(entry.getKey() + " is not a valid rabbit type at " + current.getCurrentPath());
+							continue;
+						}
+						sheepColor.put(tempCol, entry.getValue());
+					}
+					boolean sheared = current.getBoolean("isSheared", false);
+					result = new GenesisSheep(uniqueTag, customName, effects, ageLocked, isBaby, sheared, sheepColor);
+					break;
+				case SLIME: case MAGMA_CUBE:
+					int size = current.getInt("size", 3);
+					boolean recursiveSplit = current.getBoolean("recursiveSplit");
+					boolean dropOnSize1 = current.getBoolean("dropOnSize1");
+					int childrenCount = current.getInt("childrenAmount", 3);
+					if (type == EntityType.SLIME) {
+						result = new GenesisSlime(uniqueTag, customName, effects, childrenCount, size, recursiveSplit, dropOnSize1);
+					}
+					else { //magma cube
+						result = new GenesisMagmaCube(uniqueTag, customName, effects, childrenCount, size, recursiveSplit, dropOnSize1);
+					}
+				}
+				break;
+			}
+		}
+	}
+	
+	private Map <String, Double> parseDynamicChanceMap(ConfigurationSection config, String option) {
+		if (config == null || option == null) {
+			return null;
+		}
+		Map <String, Double> result = new TreeMap<String, Double>();
+		if (config.isString(option)) {
+			result.put(config.getString(option), 1.0);
+		}
+		else if (config.isConfigurationSection(option)) {
+			ConfigurationSection subSection = config.getConfigurationSection(option);
+			for(String key : subSection.getKeys(false)) {
+				ConfigurationSection current = subSection.getConfigurationSection(key);
+				String type = current.getString(option);
+				if (type == null) {
+					plugin.warning("No type specified at " + current.getCurrentPath() + ". Skipping it.");
+					continue;
+				}
+				if (!current.isDouble("chance")) {
+					plugin.warning("No chance specified at " + current.getCurrentPath() + ". Skipping it.");
+					continue;
+				}
+				double chance = current.getDouble("chance");
+				result.put(type, chance);
+			}
+		}
+		return result;
+	}
+
+	private Map<EffectCause, List<CombatEffect>> parseCombatEffects(
+			ConfigurationSection config) {
+		return null; // TODO
+	}
+}

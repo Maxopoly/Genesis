@@ -9,19 +9,16 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
+import com.github.maxopoly.Genesis.combatEffects.EffectCause;
 import com.github.maxopoly.Genesis.entities.GenesisLivingEntity;
 
 public class GenesisCreeper extends GenesisLivingEntity {
 
 	private boolean isPowered;
 
-	public GenesisCreeper(String customName, List<CombatEffect> onHitEffects,
-			List<CombatEffect> onDeathEffects,
-			List<CombatEffect> onSpawnEffects,
-			List<CombatEffect> onGetHitEffects,
-			Map<CombatEffect, Long> randomEffects, boolean isPowered) {
-		super(EntityType.CREEPER, customName, onHitEffects, onDeathEffects,
-				onSpawnEffects, onGetHitEffects, randomEffects);
+	public GenesisCreeper(String uniqueTag, String customName, Map <EffectCause, List <CombatEffect>> effects, boolean isPowered) {
+		super(EntityType.CREEPER, uniqueTag, customName, effects);
+		this.isPowered = isPowered;
 	}
 
 	public LivingEntity spawnAt(Location loc) {

@@ -6,18 +6,13 @@ import java.util.Map;
 import org.bukkit.entity.EntityType;
 
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
+import com.github.maxopoly.Genesis.combatEffects.EffectCause;
 
 public class GenesisSlime extends GenesisSplitableEntity {
 
-	public GenesisSlime(EntityType type, String customName,
-			List<CombatEffect> onHitEffects, List<CombatEffect> onDeathEffects,
-			List<CombatEffect> onSpawnEffects,
-			List<CombatEffect> onGetHitEffects,
-			Map<CombatEffect, Long> randomEffects, int childrenCount,
-			int initialSize) {
-		super(EntityType.SLIME, customName, onHitEffects, onDeathEffects,
-				onSpawnEffects, onGetHitEffects, randomEffects, childrenCount,
-				initialSize);
+	public GenesisSlime(String uniqueTag, String customName, Map <EffectCause, List <CombatEffect>> effects, int childrenCount,
+			int initialSize, boolean recursiveSplit, boolean onlyDropOnSize1) {
+		super(EntityType.SLIME, uniqueTag, customName, effects, childrenCount, initialSize, recursiveSplit, onlyDropOnSize1);
 	}
 
 }

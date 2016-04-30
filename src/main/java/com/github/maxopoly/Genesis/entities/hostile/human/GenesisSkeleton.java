@@ -11,23 +11,20 @@ import org.bukkit.entity.Skeleton.SkeletonType;
 import org.bukkit.inventory.ItemStack;
 
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
+import com.github.maxopoly.Genesis.combatEffects.EffectCause;
 
 public class GenesisSkeleton extends GenesisHumanEntity {
 
 	private boolean isWitherSkeleton;
 
-	public GenesisSkeleton(String customName, List<CombatEffect> onHitEffects,
-			List<CombatEffect> onDeathEffects,
-			List<CombatEffect> onSpawnEffects,
-			List<CombatEffect> onGetHitEffects,
-			Map<CombatEffect, Long> randomEffects, ItemStack helmetSlot,
+	public GenesisSkeleton(String uniqueTag,
+			String customName, Map<EffectCause, List<CombatEffect>> effects, ItemStack helmetSlot,
 			ItemStack chestSlot, ItemStack pantSlot, ItemStack bootSlot,
 			ItemStack handSlot, double helmetDropChance,
 			double chestplateDropChance, double leggingsDropChance,
 			double bootsDropChance, double handDropChance, boolean canPickupItems,
 			boolean isWitherSkeleton) {
-		super(EntityType.SKELETON, customName, onHitEffects, onDeathEffects,
-				onSpawnEffects, onGetHitEffects, randomEffects, helmetSlot,
+		super(EntityType.SKELETON, uniqueTag, customName, effects, helmetSlot,
 				chestSlot, pantSlot, bootSlot, handSlot, helmetDropChance,
 				chestplateDropChance, leggingsDropChance, bootsDropChance,
 				handDropChance, canPickupItems);

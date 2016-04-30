@@ -6,16 +6,13 @@ import java.util.Map;
 import org.bukkit.entity.EntityType;
 
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
+import com.github.maxopoly.Genesis.combatEffects.EffectCause;
 
 public class GenesisMushroomCow extends GenesisAnimal {
-	public GenesisMushroomCow(String customName,
-			List<CombatEffect> onHitEffects, List<CombatEffect> onDeathEffects,
-			List<CombatEffect> onSpawnEffects,
-			List<CombatEffect> onGetHitEffects,
-			Map<CombatEffect, Long> randomEffects, boolean ageLocked,
+	public GenesisMushroomCow(String uniqueTag, String customName,
+			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked,
 			boolean isBaby) {
-		super(EntityType.MUSHROOM_COW, customName, onHitEffects,
-				onDeathEffects, onSpawnEffects, onGetHitEffects, randomEffects,
+		super(EntityType.MUSHROOM_COW, uniqueTag, customName, effects,
 				ageLocked, isBaby);
 	}
 }

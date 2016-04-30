@@ -9,6 +9,7 @@ import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
 
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
+import com.github.maxopoly.Genesis.combatEffects.EffectCause;
 import com.github.maxopoly.Genesis.misc.RandomSelector;
 
 public class GenesisHorse extends GenesisAnimal {
@@ -24,17 +25,13 @@ public class GenesisHorse extends GenesisAnimal {
 	private boolean hasChest;
 	private int maximumDomestication;
 
-	public GenesisHorse(String customName, List<CombatEffect> onHitEffects,
-			List<CombatEffect> onDeathEffects,
-			List<CombatEffect> onSpawnEffects,
-			List<CombatEffect> onGetHitEffects,
-			Map<CombatEffect, Long> randomEffects, boolean ageLocked,
+	public GenesisHorse(String uniqueTag, String customName,
+			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked,
 			boolean isBaby, Map<Horse.Color, Double> colors,
 			Map<Horse.Style, Double> styles,
 			Map<Horse.Variant, Double> variants, boolean hasChest,
 			int maximumDomestication) {
-		super(EntityType.HORSE, customName, onHitEffects, onDeathEffects,
-				onSpawnEffects, onGetHitEffects, randomEffects, ageLocked,
+		super(EntityType.HORSE, uniqueTag, customName, effects, ageLocked,
 				isBaby);
 		colorSelector = new RandomSelector<Horse.Color>();
 		styleSelector = new RandomSelector<Horse.Style>();
@@ -70,8 +67,8 @@ public class GenesisHorse extends GenesisAnimal {
 		horse.setCarryingChest(hasChest);
 		if (maximumDomestication != -1) {
 			horse.setMaxDomestication(maximumDomestication);
-			horse.setDomestication(maximumDomestication);
 		}
+		horse.setDomestication(0);
 		return l;
 	}
 

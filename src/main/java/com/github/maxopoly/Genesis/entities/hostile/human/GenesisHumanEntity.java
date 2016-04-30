@@ -10,6 +10,7 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
+import com.github.maxopoly.Genesis.combatEffects.EffectCause;
 import com.github.maxopoly.Genesis.entities.GenesisLivingEntity;
 
 public abstract class GenesisHumanEntity extends GenesisLivingEntity {
@@ -25,20 +26,17 @@ public abstract class GenesisHumanEntity extends GenesisLivingEntity {
 	private double pantsDropChance;
 	private double bootDropChance;
 	private double handDropChance;
-	
+
 	private boolean canPickUpItems;
 
-	public GenesisHumanEntity(EntityType entityType, String customName,
-			List<CombatEffect> onHitEffects, List<CombatEffect> onDeathEffects,
-			List<CombatEffect> onSpawnEffects,
-			List<CombatEffect> onGetHitEffects,
-			Map<CombatEffect, Long> randomEffects, ItemStack helmetSlot,
-			ItemStack chestSlot, ItemStack pantSlot, ItemStack bootSlot,
-			ItemStack handSlot, double helmetDropChance,
+	public GenesisHumanEntity(EntityType entityType, String uniqueTag,
+			String customName, Map<EffectCause, List<CombatEffect>> effects,
+			ItemStack helmetSlot, ItemStack chestSlot, ItemStack pantSlot,
+			ItemStack bootSlot, ItemStack handSlot, double helmetDropChance,
 			double chestplateDropChance, double leggingsDropChance,
-			double bootsDropChance, double handDropChance, boolean canPickupItems) {
-		super(entityType, customName, onHitEffects, onDeathEffects,
-				onSpawnEffects, onGetHitEffects, randomEffects);
+			double bootsDropChance, double handDropChance,
+			boolean canPickupItems) {
+		super(entityType, uniqueTag, customName, effects);
 		this.helmetDropChance = helmetDropChance;
 		this.chestPlateDropChance = chestplateDropChance;
 		this.pantsDropChance = leggingsDropChance;

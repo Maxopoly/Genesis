@@ -9,6 +9,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
+import com.github.maxopoly.Genesis.combatEffects.EffectCause;
 import com.github.maxopoly.Genesis.entities.GenesisLivingEntity;
 
 public class GenesisAnimal extends GenesisLivingEntity {
@@ -16,14 +17,10 @@ public class GenesisAnimal extends GenesisLivingEntity {
 	private boolean ageLocked;
 	private boolean isBaby;
 
-	public GenesisAnimal(EntityType entityType, String customName,
-			List<CombatEffect> onHitEffects, List<CombatEffect> onDeathEffects,
-			List<CombatEffect> onSpawnEffects,
-			List<CombatEffect> onGetHitEffects,
-			Map<CombatEffect, Long> randomEffects, boolean ageLocked,
+	public GenesisAnimal(EntityType entityType, String uniqueTag, String customName,
+			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked,
 			boolean isBaby) {
-		super(entityType, customName, onHitEffects, onDeathEffects,
-				onSpawnEffects, onGetHitEffects, randomEffects);
+		super(entityType, uniqueTag, customName, effects);
 		this.ageLocked = ageLocked;
 		this.isBaby = isBaby;
 	}

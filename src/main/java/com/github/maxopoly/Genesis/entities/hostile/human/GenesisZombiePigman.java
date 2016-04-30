@@ -10,28 +10,26 @@ import org.bukkit.entity.PigZombie;
 import org.bukkit.inventory.ItemStack;
 
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
+import com.github.maxopoly.Genesis.combatEffects.EffectCause;
 
 public class GenesisZombiePigman extends GenesisHumanEntity implements
 		HumanGrowable {
 	private boolean isChild;
 	private int initialAnger;
 
-	public GenesisZombiePigman(String customName,
-			List<CombatEffect> onHitEffects, List<CombatEffect> onDeathEffects,
-			List<CombatEffect> onSpawnEffects,
-			List<CombatEffect> onGetHitEffects,
-			Map<CombatEffect, Long> randomEffects, ItemStack helmetSlot,
+	public GenesisZombiePigman(String uniqueTag,
+			String customName, Map<EffectCause, List<CombatEffect>> effects, ItemStack helmetSlot,
 			ItemStack chestSlot, ItemStack pantSlot, ItemStack bootSlot,
 			ItemStack handSlot, double helmetDropChance,
 			double chestplateDropChance, double leggingsDropChance,
 			double bootsDropChance, double handDropChance,
-			boolean canPickupItems, boolean child) {
-		super(EntityType.PIG_ZOMBIE, customName, onHitEffects, onDeathEffects,
-				onSpawnEffects, onGetHitEffects, randomEffects, helmetSlot,
+			boolean canPickupItems, boolean child, int initialAnger) {
+		super(EntityType.PIG_ZOMBIE, uniqueTag, customName, effects, helmetSlot,
 				chestSlot, pantSlot, bootSlot, handSlot, helmetDropChance,
 				chestplateDropChance, leggingsDropChance, bootsDropChance,
 				handDropChance, canPickupItems);
 		this.isChild = child;
+		this.initialAnger = initialAnger;
 	}
 
 	public LivingEntity spawnAt(Location loc) {

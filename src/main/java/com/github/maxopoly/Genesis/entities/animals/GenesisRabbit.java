@@ -9,6 +9,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Rabbit;
 
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
+import com.github.maxopoly.Genesis.combatEffects.EffectCause;
 import com.github.maxopoly.Genesis.misc.RandomSelector;
 
 public class GenesisRabbit extends GenesisAnimal {
@@ -17,14 +18,10 @@ public class GenesisRabbit extends GenesisAnimal {
 
 	private Map<Rabbit.Type, Double> types;
 
-	public GenesisRabbit(String customName, List<CombatEffect> onHitEffects,
-			List<CombatEffect> onDeathEffects,
-			List<CombatEffect> onSpawnEffects,
-			List<CombatEffect> onGetHitEffects,
-			Map<CombatEffect, Long> randomEffects, boolean ageLocked,
+	public GenesisRabbit(String uniqueTag, String customName,
+			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked,
 			boolean isBaby, Map<Rabbit.Type, Double> types) {
-		super(EntityType.RABBIT, customName, onHitEffects, onDeathEffects,
-				onSpawnEffects, onGetHitEffects, randomEffects, ageLocked,
+		super(EntityType.RABBIT, uniqueTag, customName, effects, ageLocked,
 				isBaby);
 		this.types = types;
 		typeSelector = new RandomSelector<Rabbit.Type>();

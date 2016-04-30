@@ -10,6 +10,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Wolf;
 
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
+import com.github.maxopoly.Genesis.combatEffects.EffectCause;
 import com.github.maxopoly.Genesis.misc.RandomSelector;
 
 public class GenesisWolf extends GenesisAnimal {
@@ -18,14 +19,10 @@ public class GenesisWolf extends GenesisAnimal {
 	
 	private Map <DyeColor, Double> collarColors;
 
-	public GenesisWolf(String customName, List<CombatEffect> onHitEffects,
-			List<CombatEffect> onDeathEffects,
-			List<CombatEffect> onSpawnEffects,
-			List<CombatEffect> onGetHitEffects,
-			Map<CombatEffect, Long> randomEffects, boolean ageLocked,
+	public GenesisWolf(String uniqueTag, String customName,
+			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked,
 			boolean isBaby, Map <DyeColor, Double> collarColors) {
-		super(EntityType.WOLF, customName, onHitEffects, onDeathEffects,
-				onSpawnEffects, onGetHitEffects, randomEffects, ageLocked,
+		super(EntityType.WOLF, uniqueTag, customName, effects, ageLocked,
 				isBaby);
 		this.collarColors = collarColors;
 		colorSelector = new RandomSelector<DyeColor>();

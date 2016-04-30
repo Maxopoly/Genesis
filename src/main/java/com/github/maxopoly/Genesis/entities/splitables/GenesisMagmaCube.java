@@ -6,16 +6,12 @@ import java.util.Map;
 import org.bukkit.entity.EntityType;
 
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
+import com.github.maxopoly.Genesis.combatEffects.EffectCause;
 
 public class GenesisMagmaCube extends GenesisSplitableEntity {
-	public GenesisMagmaCube(EntityType type, String customName,
-			List<CombatEffect> onHitEffects, List<CombatEffect> onDeathEffects,
-			List<CombatEffect> onSpawnEffects,
-			List<CombatEffect> onGetHitEffects,
-			Map<CombatEffect, Long> randomEffects, int childrenCount,
-			int initialSize) {
-		super(EntityType.MAGMA_CUBE, customName, onHitEffects, onDeathEffects,
-				onSpawnEffects, onGetHitEffects, randomEffects, childrenCount,
-				initialSize);
+	
+	public GenesisMagmaCube(String uniqueTag, String customName, Map <EffectCause, List <CombatEffect>> effects, int childrenCount,
+			int initialSize, boolean recursiveSplit, boolean onlyDropOnSize1) {
+		super(EntityType.MAGMA_CUBE, uniqueTag, customName, effects, childrenCount, initialSize, recursiveSplit, onlyDropOnSize1);
 	}
 }

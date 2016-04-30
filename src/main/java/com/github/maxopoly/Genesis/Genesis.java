@@ -4,8 +4,10 @@ import vg.civcraft.mc.civmodcore.ACivMod;
 
 public class Genesis extends ACivMod {
 	
+	private static Genesis instance;
+	
 	public void onEnable() {
-		
+		instance = this;
 	}
 	
 	public void onDisable() {
@@ -14,5 +16,9 @@ public class Genesis extends ACivMod {
 	
 	public String getPluginName() {
 		return "Genesis";
+	}
+	
+	public static Genesis instance() {
+		return instance;
 	}
 }
