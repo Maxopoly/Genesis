@@ -32,7 +32,7 @@ public class GenesisZombie extends GenesisHumanEntity implements HumanGrowable {
 
 	public LivingEntity spawnAt(Location loc) {
 		LivingEntity l = super.spawnAt(loc);
-		((Zombie) l).setBaby(true);
+		((Zombie) l).setBaby(isChild);
 		return l;
 	}
 

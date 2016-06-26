@@ -1,7 +1,5 @@
 package com.github.maxopoly.Genesis.listener;
 
-import java.util.Set;
-
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -13,16 +11,16 @@ import com.github.maxopoly.Genesis.Genesis;
 
 public class SpawnPreventionListener implements Listener {
 	
-	private Set <SpawnReason> disallowedSpawns;
+	private boolean cancelNaturalSpawns;
 	
-	public SpawnPreventionListener(Set <SpawnReason> disallowedSpawns) {
-		this.disallowedSpawns = disallowedSpawns;
-		Bukkit.getPluginManager().registerEvents(this, Genesis.instance());
+	public SpawnPreventionListener(boolean cancelNaturalSpawns) {
+		this.cancelNaturalSpawns = cancelNaturalSpawns;
+		Bukkit.getPluginManager().registerEvents(this, Genesis.getInstance());
 	}
 
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
 	public void entitySpawn(CreatureSpawnEvent e) {
-		if (disallowedSpawns.contains(e.getSpawnReason())) {
+		if (cancelNaturalSpawns && e.getSpawnReason() == SpawnReason.NATURAL) {
 			e.setCancelled(true);
 		}
 	}

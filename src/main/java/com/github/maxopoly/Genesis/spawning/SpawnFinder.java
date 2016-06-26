@@ -4,20 +4,30 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Player;
 
+import vg.civcraft.mc.civmodcore.areas.IArea;
+
+import com.github.maxopoly.Genesis.Genesis;
 import com.github.maxopoly.Genesis.entities.GenesisLivingEntity;
 
-public class SpawnFinder {
+public class SpawnFinder implements Runnable {
+
+	private static List<BlockFace> cardinalDirections;
 
 	private List<Material> blocksToSpawnOn;
 	private List<Material> blocksNotToSpawnOn;
 	private List<Material> blocksToSpawnIn;
+
+	private List<IArea> spawnAreas;
+	private int chunkSpawnRange;
 
 	private int minimumLightLevelRequired;
 	private int maximumLightLevelAllowed;
@@ -31,18 +41,19 @@ public class SpawnFinder {
 	private int attempts;
 	private double spawnChance;
 
-	private List<BlockFace> cardinalDirections;
-
 	private List<GenesisLivingEntity> entities;
 
 	private Random rng;
+	private int PID;
+	private long spawnDelay;
 
 	public SpawnFinder(List<Material> blocksToSpawnOn,
 			List<Material> blocksNotToSpawnOn, List<Material> blocksToSpawnIn,
+			List<IArea> spawnAreas, int chunkSpawnRange,
 			int minimumLightLevelRequired, int maximumLightLevelAllowed,
 			int spawnInSpaceUpwards, int extraSpawnInSpaceSidewards,
 			int attempts, int minimumY, int maximumY, double spawnChance,
-			List<GenesisLivingEntity> entities) {
+			List<GenesisLivingEntity> entities, long spawnDelay) {
 		this.blocksNotToSpawnOn = blocksNotToSpawnOn;
 		this.blocksToSpawnIn = blocksToSpawnIn;
 		this.blocksToSpawnOn = blocksToSpawnOn;
@@ -54,6 +65,8 @@ public class SpawnFinder {
 		this.attempts = attempts;
 		this.minimumY = minimumY;
 		this.maximumY = maximumY;
+		this.spawnAreas = spawnAreas;
+		this.chunkSpawnRange = chunkSpawnRange;
 		this.rng = new Random();
 		this.entities = entities;
 		if (cardinalDirections == null) {
@@ -62,6 +75,29 @@ public class SpawnFinder {
 			cardinalDirections.add(BlockFace.EAST);
 			cardinalDirections.add(BlockFace.SOUTH);
 			cardinalDirections.add(BlockFace.WEST);
+		}
+		this.spawnDelay = spawnDelay;
+		this.PID = Bukkit.getScheduler().scheduleSyncRepeatingTask(
+				Genesis.getInstance(), this, spawnDelay, spawnDelay);
+	}
+
+	@Override
+	public void run() {
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			Location playerLoc = p.getLocation();
+			for (IArea area : spawnAreas) {
+				if (area.isInArea(playerLoc)) {
+					Chunk c = playerLoc
+							.getWorld()
+							.getChunkAt(
+									(int) (playerLoc.getChunk().getX()
+											+ (Math.round((rng.nextDouble() - 0.5) * 2.0 * chunkSpawnRange))),
+									(int) (playerLoc.getChunk().getZ()
+											+ (Math.round((rng.nextDouble() - 0.5) * 2.0 * chunkSpawnRange))));
+					attemptToSpawn(c);
+					break;
+				}
+			}
 		}
 	}
 
@@ -121,8 +157,12 @@ public class SpawnFinder {
 				}
 				foundRange++;
 				if (foundRange > spawnInSpaceUpwards) {
-					validY.add(y);
+					validY.add((y - (int) Math.ceil(spawnInSpaceUpwards * 0.5)));
+					foundRange = 0;
 				}
+			}
+			else {
+				foundRange = 0;
 			}
 		}
 		if (validY.size() > 0) {
@@ -222,18 +262,26 @@ public class SpawnFinder {
 	public int getMaxiumYLevel() {
 		return maximumY;
 	}
-	
+
 	/**
 	 * @return The entities spawned by this instance
 	 */
 	public List<GenesisLivingEntity> getEntities() {
 		return entities;
 	}
-	
+
 	/**
-	 * @return The chance for this instance to attempt to spawn entities when it's given a chunk
+	 * @return The chance for this instance to attempt to spawn entities when
+	 *         it's given a chunk
 	 */
 	public double getSpawnChance() {
 		return spawnChance;
+	}
+
+	/**
+	 * @return Process id of this instance to cancel it later on
+	 */
+	private int getPID() {
+		return PID;
 	}
 }

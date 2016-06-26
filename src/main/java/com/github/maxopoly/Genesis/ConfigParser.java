@@ -1,21 +1,24 @@
 package com.github.maxopoly.Genesis;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.bukkit.DyeColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Rabbit;
-import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 
+import vg.civcraft.mc.civmodcore.areas.IArea;
 import vg.civcraft.mc.civmodcore.itemHandling.ItemMap;
+import vg.civcraft.mc.civmodcore.util.ConfigParsing;
 import static vg.civcraft.mc.civmodcore.util.ConfigParsing.parseItemMapDirectly;
 
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
@@ -42,6 +45,8 @@ import com.github.maxopoly.Genesis.entities.hostile.human.GenesisZombie;
 import com.github.maxopoly.Genesis.entities.hostile.human.GenesisZombiePigman;
 import com.github.maxopoly.Genesis.entities.splitables.GenesisMagmaCube;
 import com.github.maxopoly.Genesis.entities.splitables.GenesisSlime;
+import com.github.maxopoly.Genesis.listener.SpawnPreventionListener;
+import com.github.maxopoly.Genesis.spawning.SpawnFinder;
 
 public class ConfigParser {
 
@@ -56,14 +61,94 @@ public class ConfigParser {
 		plugin.saveDefaultConfig();
 		plugin.reloadConfig();
 		FileConfiguration config = plugin.getConfig();
-		parseEntities(config.getConfigurationSection("entities"));
+		parseSpawnFinders(config.getConfigurationSection("spawns"));
+		boolean disableNormalSpawns = config.getBoolean("disableNaturalSpawns", false);
+		if (disableNormalSpawns) {
+			new SpawnPreventionListener(true);
+			//will register itself
+		}
 	}
 
-	public void parseEntities(ConfigurationSection config) {
+	public void parseSpawnFinders(ConfigurationSection config) {
 		if (config == null) {
-			plugin.warning("No entities specified in config");
+			plugin.severe("No spawns specified in config");
 			return;
 		}
+		for (String key : config.getKeys(false)) {
+			ConfigurationSection current = config.getConfigurationSection(key);
+			if (current == null) {
+				plugin.warning("Invalid value found at "
+						+ config.getCurrentPath() + "." + key
+						+ ". Only config sections allowed on this level");
+				continue;
+			}
+			List<Material> blocksToSpawnOn = parseMaterialList(current,
+					"blocksToSpawnOn");
+			List<Material> blocksNotToSpawnOn = parseMaterialList(current,
+					"blocksNotToSpawnOn");
+			List<Material> blocksToSpawnIn = parseMaterialList(current,
+					"blocksToSpawnIn");
+			if (blocksToSpawnOn != null && blocksNotToSpawnOn != null) {
+				plugin.warning("You specified both blocks to spawn on and not to spawn on at "
+						+ current.getCurrentPath()
+						+ " this doesn't make much sense, please read the documentation");
+			}
+			ConfigurationSection areaSection = current
+					.getConfigurationSection("spawnAreas");
+			if (areaSection == null) {
+				plugin.warning("No area specified at "
+						+ current.getCurrentPath() + " skipping it");
+				continue;
+			}
+			List<IArea> spawnAreas = new ArrayList<IArea>();
+			for (String areaKey : areaSection.getKeys(false)) {
+				IArea area = ConfigParsing.parseArea(areaSection
+						.getConfigurationSection(areaKey));
+				if (area == null) {
+					plugin.warning("Failed to parse area with key " + areaKey
+							+ " at " + areaSection);
+					continue;
+				}
+				spawnAreas.add(area);
+			}
+			int chunkSpawnRange = current.getInt("chunkSpawnRange", 4);
+			int minimumLightLevelRequired = current.getInt("minimumLightLevel",
+					0);
+			int maximumLightLevelAllowed = current.getInt("maximumLightLevel",
+					15);
+			int spawnInSpaceUpwards = current.getInt("spawnInSpaceUpwards", 2);
+			int extraSpawnInSpaceSidewards = current.getInt(
+					"extraSpawnInSpaceSidewards", 0);
+			int attempts = current.getInt("attempts", 5);
+			int minimumY = current.getInt("minimumY", 0);
+			int maximumY = current.getInt("maximumY", 255);
+			double spawnChance = current.getDouble("spawnChance", 1.0);
+			List<GenesisLivingEntity> entities = parseEntities(current
+					.getConfigurationSection("entities"));
+			if (entities == null) {
+				plugin.warning("Failed to parse entities at "
+						+ current.getCurrentPath() + ". Skipping it");
+				continue;
+			}
+			long spawnDelay = ConfigParsing.parseTime(current.getString("spawnDelay", "1m"));
+			// default once a minute
+
+			Genesis.getManager().registerSpawnFinder(
+					new SpawnFinder(blocksToSpawnOn, blocksNotToSpawnOn,
+							blocksToSpawnIn, spawnAreas, chunkSpawnRange,
+							minimumLightLevelRequired,
+							maximumLightLevelAllowed, spawnInSpaceUpwards,
+							extraSpawnInSpaceSidewards, attempts, minimumY,
+							maximumY, spawnChance, entities, spawnDelay));
+		}
+	}
+
+	public List<GenesisLivingEntity> parseEntities(ConfigurationSection config) {
+		if (config == null) {
+			plugin.warning("No entities specified in config");
+			return null;
+		}
+		List<GenesisLivingEntity> entities = new ArrayList<GenesisLivingEntity>();
 		for (String key : config.getKeys(false)) {
 			ConfigurationSection current = config.getConfigurationSection(key);
 			if (current == null) {
@@ -205,169 +290,241 @@ public class ConfigParser {
 					}
 				}
 				break;
-			//animals
-			case CHICKEN: case COW: case HORSE: case MUSHROOM_COW: case OCELOT: case PIG: case RABBIT: case WOLF: case SHEEP:
+			// animals
+			case CHICKEN:
+			case COW:
+			case HORSE:
+			case MUSHROOM_COW:
+			case OCELOT:
+			case PIG:
+			case RABBIT:
+			case WOLF:
+			case SHEEP:
 				boolean ageLocked = current.getBoolean("ageLocked", false);
 				boolean isBaby = current.getBoolean("child", false);
 				switch (type) {
 				case CHICKEN:
-					result = new GenesisChicken(uniqueTag, customName, effects, ageLocked, isBaby);
+					result = new GenesisChicken(uniqueTag, customName, effects,
+							ageLocked, isBaby);
 					break;
 				case COW:
-					result = new GenesisCow(uniqueTag, customName, effects, ageLocked, isBaby);
+					result = new GenesisCow(uniqueTag, customName, effects,
+							ageLocked, isBaby);
 					break;
 				case HORSE:
-					Map <String, Double> color = parseDynamicChanceMap(current, "color");
-					Map <Horse.Color, Double> colors = new TreeMap<Horse.Color, Double>();
-					for(Entry <String, Double> entry : color.entrySet()) {
+					Map<String, Double> color = parseDynamicChanceMap(current,
+							"color");
+					Map<Horse.Color, Double> colors = new TreeMap<Horse.Color, Double>();
+					for (Entry<String, Double> entry : color.entrySet()) {
 						Horse.Color tempCol;
 						try {
-							tempCol  = Horse.Color.valueOf(entry.getKey());	
-						}
-						catch (IllegalArgumentException e) {
-							plugin.warning(entry.getKey() + " is not a valid horse color at " + current.getCurrentPath());
+							tempCol = Horse.Color.valueOf(entry.getKey());
+						} catch (IllegalArgumentException e) {
+							plugin.warning(entry.getKey()
+									+ " is not a valid horse color at "
+									+ current.getCurrentPath());
 							continue;
 						}
 						colors.put(tempCol, entry.getValue());
 					}
-					Map <String, Double> style = parseDynamicChanceMap(current, "style");
-					Map <Horse.Style, Double> styles = new TreeMap<Horse.Style, Double>();
-					for(Entry <String, Double> entry : style.entrySet()) {
+					Map<String, Double> style = parseDynamicChanceMap(current,
+							"style");
+					Map<Horse.Style, Double> styles = new TreeMap<Horse.Style, Double>();
+					for (Entry<String, Double> entry : style.entrySet()) {
 						Horse.Style tempCol;
 						try {
-							tempCol  = Horse.Style.valueOf(entry.getKey());	
-						}
-						catch (IllegalArgumentException e) {
-							plugin.warning(entry.getKey() + " is not a valid horse style at " + current.getCurrentPath());
+							tempCol = Horse.Style.valueOf(entry.getKey());
+						} catch (IllegalArgumentException e) {
+							plugin.warning(entry.getKey()
+									+ " is not a valid horse style at "
+									+ current.getCurrentPath());
 							continue;
 						}
 						styles.put(tempCol, entry.getValue());
 					}
-					Map <String, Double> variant = parseDynamicChanceMap(current, "variant");
-					Map <Horse.Variant, Double> variants = new TreeMap<Horse.Variant, Double>();
-					for(Entry <String, Double> entry : variant.entrySet()) {
+					Map<String, Double> variant = parseDynamicChanceMap(
+							current, "variant");
+					Map<Horse.Variant, Double> variants = new TreeMap<Horse.Variant, Double>();
+					for (Entry<String, Double> entry : variant.entrySet()) {
 						Horse.Variant tempCol;
 						try {
-							tempCol  = Horse.Variant.valueOf(entry.getKey());	
-						}
-						catch (IllegalArgumentException e) {
-							plugin.warning(entry.getKey() + " is not a valid horse color at " + current.getCurrentPath());
+							tempCol = Horse.Variant.valueOf(entry.getKey());
+						} catch (IllegalArgumentException e) {
+							plugin.warning(entry.getKey()
+									+ " is not a valid horse color at "
+									+ current.getCurrentPath());
 							continue;
 						}
 						variants.put(tempCol, entry.getValue());
 					}
 					boolean hasChest = current.getBoolean("hasChest", false);
-					int maximumDomestication = current.getInt("maximumDomestication", -1);
-					result = new GenesisHorse(uniqueTag, customName, effects, ageLocked, isBaby, colors, styles, variants, hasChest, maximumDomestication);
+					int maximumDomestication = current.getInt(
+							"maximumDomestication", -1);
+					result = new GenesisHorse(uniqueTag, customName, effects,
+							ageLocked, isBaby, colors, styles, variants,
+							hasChest, maximumDomestication);
 					break;
 				case MUSHROOM_COW:
-					result = new GenesisMushroomCow(uniqueTag, customName, effects, ageLocked, isBaby);
+					result = new GenesisMushroomCow(uniqueTag, customName,
+							effects, ageLocked, isBaby);
 					break;
 				case OCELOT:
-					Map <String, Double> oceTypes = parseDynamicChanceMap(current, "type");
-					Map <Ocelot.Type, Double> oceType = new TreeMap<Ocelot.Type, Double>();
-					for(Entry <String, Double> entry : oceTypes.entrySet()) {
+					Map<String, Double> oceTypes = parseDynamicChanceMap(
+							current, "type");
+					Map<Ocelot.Type, Double> oceType = new TreeMap<Ocelot.Type, Double>();
+					for (Entry<String, Double> entry : oceTypes.entrySet()) {
 						Ocelot.Type tempCol;
 						try {
-							tempCol  = Ocelot.Type.valueOf(entry.getKey());	
-						}
-						catch (IllegalArgumentException e) {
-							plugin.warning(entry.getKey() + " is not a valid ocelote type at " + current.getCurrentPath());
+							tempCol = Ocelot.Type.valueOf(entry.getKey());
+						} catch (IllegalArgumentException e) {
+							plugin.warning(entry.getKey()
+									+ " is not a valid ocelote type at "
+									+ current.getCurrentPath());
 							continue;
 						}
 						oceType.put(tempCol, entry.getValue());
 					}
-					result = new GenesisOcelot(uniqueTag, customName, effects, ageLocked, isBaby, oceType);
+					result = new GenesisOcelot(uniqueTag, customName, effects,
+							ageLocked, isBaby, oceType);
 					break;
 				case PIG:
 					boolean hasSaddle = current.getBoolean("hasSaddle", false);
-					result = new GenesisPig(uniqueTag, customName, effects, ageLocked, isBaby, hasSaddle);
+					result = new GenesisPig(uniqueTag, customName, effects,
+							ageLocked, isBaby, hasSaddle);
 					break;
 				case RABBIT:
-					Map <String, Double> rabbitTypes = parseDynamicChanceMap(current, "type");
-					Map <Rabbit.Type, Double> rabbitType = new TreeMap<Rabbit.Type, Double>();
-					for(Entry <String, Double> entry : rabbitTypes.entrySet()) {
+					Map<String, Double> rabbitTypes = parseDynamicChanceMap(
+							current, "type");
+					Map<Rabbit.Type, Double> rabbitType = new TreeMap<Rabbit.Type, Double>();
+					for (Entry<String, Double> entry : rabbitTypes.entrySet()) {
 						Rabbit.Type tempCol;
 						try {
-							tempCol  = Rabbit.Type.valueOf(entry.getKey());	
-						}
-						catch (IllegalArgumentException e) {
-							plugin.warning(entry.getKey() + " is not a valid rabbit type at " + current.getCurrentPath());
+							tempCol = Rabbit.Type.valueOf(entry.getKey());
+						} catch (IllegalArgumentException e) {
+							plugin.warning(entry.getKey()
+									+ " is not a valid rabbit type at "
+									+ current.getCurrentPath());
 							continue;
 						}
 						rabbitType.put(tempCol, entry.getValue());
 					}
-					result = new GenesisRabbit(uniqueTag, customName, effects, ageLocked, isBaby, rabbitType);
+					result = new GenesisRabbit(uniqueTag, customName, effects,
+							ageLocked, isBaby, rabbitType);
 					break;
 				case WOLF:
-					Map <String, Double> dogColors = parseDynamicChanceMap(current, "collarColor");
-					Map <DyeColor, Double> dogColor = new TreeMap<DyeColor, Double>();
-					for(Entry <String, Double> entry : dogColors.entrySet()) {
+					Map<String, Double> dogColors = parseDynamicChanceMap(
+							current, "collarColor");
+					Map<DyeColor, Double> dogColor = new TreeMap<DyeColor, Double>();
+					for (Entry<String, Double> entry : dogColors.entrySet()) {
 						DyeColor tempCol;
 						try {
-							tempCol  = DyeColor.valueOf(entry.getKey());	
-						}
-						catch (IllegalArgumentException e) {
-							plugin.warning(entry.getKey() + " is not a valid rabbit type at " + current.getCurrentPath());
+							tempCol = DyeColor.valueOf(entry.getKey());
+						} catch (IllegalArgumentException e) {
+							plugin.warning(entry.getKey()
+									+ " is not a valid rabbit type at "
+									+ current.getCurrentPath());
 							continue;
 						}
 						dogColor.put(tempCol, entry.getValue());
 					}
-					result = new GenesisWolf(uniqueTag, customName, effects, ageLocked, isBaby, dogColor);
+					result = new GenesisWolf(uniqueTag, customName, effects,
+							ageLocked, isBaby, dogColor);
 					break;
 				case SHEEP:
-					Map <String, Double> sheepColors = parseDynamicChanceMap(current, "collarColor");
-					Map <DyeColor, Double> sheepColor = new TreeMap<DyeColor, Double>();
-					for(Entry <String, Double> entry : sheepColors.entrySet()) {
+					Map<String, Double> sheepColors = parseDynamicChanceMap(
+							current, "collarColor");
+					Map<DyeColor, Double> sheepColor = new TreeMap<DyeColor, Double>();
+					for (Entry<String, Double> entry : sheepColors.entrySet()) {
 						DyeColor tempCol;
 						try {
-							tempCol  = DyeColor.valueOf(entry.getKey());	
-						}
-						catch (IllegalArgumentException e) {
-							plugin.warning(entry.getKey() + " is not a valid rabbit type at " + current.getCurrentPath());
+							tempCol = DyeColor.valueOf(entry.getKey());
+						} catch (IllegalArgumentException e) {
+							plugin.warning(entry.getKey()
+									+ " is not a valid rabbit type at "
+									+ current.getCurrentPath());
 							continue;
 						}
 						sheepColor.put(tempCol, entry.getValue());
 					}
 					boolean sheared = current.getBoolean("isSheared", false);
-					result = new GenesisSheep(uniqueTag, customName, effects, ageLocked, isBaby, sheared, sheepColor);
+					result = new GenesisSheep(uniqueTag, customName, effects,
+							ageLocked, isBaby, sheared, sheepColor);
 					break;
-				case SLIME: case MAGMA_CUBE:
+				case SLIME:
+				case MAGMA_CUBE:
 					int size = current.getInt("size", 3);
-					boolean recursiveSplit = current.getBoolean("recursiveSplit");
+					boolean recursiveSplit = current
+							.getBoolean("recursiveSplit");
 					boolean dropOnSize1 = current.getBoolean("dropOnSize1");
 					int childrenCount = current.getInt("childrenAmount", 3);
 					if (type == EntityType.SLIME) {
-						result = new GenesisSlime(uniqueTag, customName, effects, childrenCount, size, recursiveSplit, dropOnSize1);
-					}
-					else { //magma cube
-						result = new GenesisMagmaCube(uniqueTag, customName, effects, childrenCount, size, recursiveSplit, dropOnSize1);
+						result = new GenesisSlime(uniqueTag, customName,
+								effects, childrenCount, size, recursiveSplit,
+								dropOnSize1);
+					} else { // magma cube
+						result = new GenesisMagmaCube(uniqueTag, customName,
+								effects, childrenCount, size, recursiveSplit,
+								dropOnSize1);
 					}
 				}
 				break;
 			}
+			if (result != null) {
+				entities.add(result);
+			}
 		}
+		return entities;
 	}
-	
-	private Map <String, Double> parseDynamicChanceMap(ConfigurationSection config, String option) {
+
+	private List<Material> parseMaterialList(ConfigurationSection config,
+			String key) {
+		if (config == null || key == null) {
+			return null;
+		}
+		List<String> stringParsed = config.getStringList(key);
+		if (stringParsed == null || stringParsed.size() == 0) {
+			return null;
+		}
+		List<Material> materials = new ArrayList<Material>();
+		for (String s : stringParsed) {
+			Material m;
+			try {
+				m = Material.valueOf(s);
+			} catch (IllegalArgumentException e) {
+				plugin.warning(s
+						+ " is specified at "
+						+ config
+						+ " as material, but is no valid material. It was skipped");
+				continue;
+			}
+			materials.add(m);
+		}
+		return materials;
+	}
+
+	private Map<String, Double> parseDynamicChanceMap(
+			ConfigurationSection config, String option) {
 		if (config == null || option == null) {
 			return null;
 		}
-		Map <String, Double> result = new TreeMap<String, Double>();
+		Map<String, Double> result = new TreeMap<String, Double>();
 		if (config.isString(option)) {
 			result.put(config.getString(option), 1.0);
-		}
-		else if (config.isConfigurationSection(option)) {
-			ConfigurationSection subSection = config.getConfigurationSection(option);
-			for(String key : subSection.getKeys(false)) {
-				ConfigurationSection current = subSection.getConfigurationSection(key);
+		} else if (config.isConfigurationSection(option)) {
+			ConfigurationSection subSection = config
+					.getConfigurationSection(option);
+			for (String key : subSection.getKeys(false)) {
+				ConfigurationSection current = subSection
+						.getConfigurationSection(key);
 				String type = current.getString(option);
 				if (type == null) {
-					plugin.warning("No type specified at " + current.getCurrentPath() + ". Skipping it.");
+					plugin.warning("No type specified at "
+							+ current.getCurrentPath() + ". Skipping it.");
 					continue;
 				}
 				if (!current.isDouble("chance")) {
-					plugin.warning("No chance specified at " + current.getCurrentPath() + ". Skipping it.");
+					plugin.warning("No chance specified at "
+							+ current.getCurrentPath() + ". Skipping it.");
 					continue;
 				}
 				double chance = current.getDouble("chance");
