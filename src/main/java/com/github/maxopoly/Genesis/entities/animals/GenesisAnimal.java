@@ -11,16 +11,18 @@ import org.bukkit.entity.LivingEntity;
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
 import com.github.maxopoly.Genesis.combatEffects.EffectCause;
 import com.github.maxopoly.Genesis.entities.GenesisLivingEntity;
+import com.github.maxopoly.Genesis.misc.Drops;
 
 public class GenesisAnimal extends GenesisLivingEntity {
 
 	private boolean ageLocked;
 	private boolean isBaby;
 
-	public GenesisAnimal(EntityType entityType, String uniqueTag, String customName,
+	public GenesisAnimal(EntityType entityType, String uniqueTag,
+			String customName, Map<List<Drops>, Double> drops,
 			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked,
 			boolean isBaby) {
-		super(entityType, uniqueTag, customName, effects);
+		super(entityType, uniqueTag, customName, drops, effects);
 		this.ageLocked = ageLocked;
 		this.isBaby = isBaby;
 	}

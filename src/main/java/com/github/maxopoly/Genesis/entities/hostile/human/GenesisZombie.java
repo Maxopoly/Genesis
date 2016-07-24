@@ -11,22 +11,24 @@ import org.bukkit.inventory.ItemStack;
 
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
 import com.github.maxopoly.Genesis.combatEffects.EffectCause;
+import com.github.maxopoly.Genesis.misc.Drops;
 
 public class GenesisZombie extends GenesisHumanEntity implements HumanGrowable {
 
 	private boolean isChild;
 
-	public GenesisZombie(String uniqueTag,
-			String customName, Map<EffectCause, List<CombatEffect>> effects, ItemStack helmetSlot,
+	public GenesisZombie(String uniqueTag, String customName,
+			Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects, ItemStack helmetSlot,
 			ItemStack chestSlot, ItemStack pantSlot, ItemStack bootSlot,
 			ItemStack handSlot, double helmetDropChance,
 			double chestplateDropChance, double leggingsDropChance,
 			double bootsDropChance, double handDropChance,
 			boolean canPickupItems, boolean child) {
-		super(EntityType.ZOMBIE, uniqueTag, customName, effects, helmetSlot,
-				chestSlot, pantSlot, bootSlot, handSlot, helmetDropChance,
-				chestplateDropChance, leggingsDropChance, bootsDropChance,
-				handDropChance, canPickupItems);
+		super(EntityType.ZOMBIE, uniqueTag, customName, drops, effects,
+				helmetSlot, chestSlot, pantSlot, bootSlot, handSlot,
+				helmetDropChance, chestplateDropChance, leggingsDropChance,
+				bootsDropChance, handDropChance, canPickupItems);
 		this.isChild = child;
 	}
 

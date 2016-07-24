@@ -11,6 +11,7 @@ import org.bukkit.entity.Slime;
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
 import com.github.maxopoly.Genesis.combatEffects.EffectCause;
 import com.github.maxopoly.Genesis.entities.GenesisLivingEntity;
+import com.github.maxopoly.Genesis.misc.Drops;
 
 public abstract class GenesisSplitableEntity extends GenesisLivingEntity {
 
@@ -19,23 +20,22 @@ public abstract class GenesisSplitableEntity extends GenesisLivingEntity {
 	private boolean recursiveSplit;
 	private boolean onlyDropOnSize1;
 
-	public GenesisSplitableEntity(EntityType type, String uniqueTag, String customName,
-			Map <EffectCause, List <CombatEffect>> effects, int childrenCount,
+	public GenesisSplitableEntity(EntityType type, String uniqueTag,
+			String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects, int childrenCount,
 			int initialSize, boolean recursiveSplit, boolean onlyDropOnSize1) {
-		super(type, uniqueTag, customName, effects);
+		super(type, uniqueTag, customName, drops, effects);
 		this.childrenCount = childrenCount;
 		this.initialSize = initialSize;
 		this.recursiveSplit = recursiveSplit;
 		this.onlyDropOnSize1 = onlyDropOnSize1;
 	}
-	
+
 	public LivingEntity spawnAt(Location loc) {
 		Slime slime = (Slime) super.spawnAt(loc);
 		slime.setSize(initialSize);
 		return slime;
 	}
-
-	
 
 	public int getChildrenCount() {
 		return childrenCount;
@@ -44,11 +44,11 @@ public abstract class GenesisSplitableEntity extends GenesisLivingEntity {
 	public int getInitalSize() {
 		return initialSize;
 	}
-	
+
 	public boolean getRecursiveSplit() {
 		return recursiveSplit;
 	}
-	
+
 	public boolean getDropOnSize1Only() {
 		return onlyDropOnSize1;
 	}

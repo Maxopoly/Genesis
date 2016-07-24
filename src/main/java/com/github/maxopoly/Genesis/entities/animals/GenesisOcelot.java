@@ -10,6 +10,7 @@ import org.bukkit.entity.Ocelot;
 
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
 import com.github.maxopoly.Genesis.combatEffects.EffectCause;
+import com.github.maxopoly.Genesis.misc.Drops;
 import com.github.maxopoly.Genesis.misc.RandomSelector;
 
 public class GenesisOcelot extends GenesisAnimal {
@@ -18,10 +19,10 @@ public class GenesisOcelot extends GenesisAnimal {
 	
 	private Map<Ocelot.Type, Double> types;
 
-	public GenesisOcelot(String uniqueTag, String customName,
+	public GenesisOcelot(String uniqueTag, String customName,Map<List<Drops>, Double> drops,
 			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked,
 			boolean isBaby, Map<Ocelot.Type, Double> types) {
-		super(EntityType.OCELOT, uniqueTag, customName, effects, ageLocked,
+		super(EntityType.OCELOT, uniqueTag, customName, drops,effects, ageLocked,
 				isBaby);
 		this.types = types;
 		typeSelector = new RandomSelector<Ocelot.Type>();

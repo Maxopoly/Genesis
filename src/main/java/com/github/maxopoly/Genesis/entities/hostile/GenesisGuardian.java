@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Guardian;
 import org.bukkit.entity.LivingEntity;
 
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
@@ -13,25 +13,25 @@ import com.github.maxopoly.Genesis.combatEffects.EffectCause;
 import com.github.maxopoly.Genesis.entities.GenesisLivingEntity;
 import com.github.maxopoly.Genesis.misc.Drops;
 
-public class GenesisCreeper extends GenesisLivingEntity {
+public class GenesisGuardian extends GenesisLivingEntity {
 
-	private boolean isPowered;
+	private boolean isElder;
 
-	public GenesisCreeper(String uniqueTag, String customName, Map<List<Drops>, Double> drops,Map <EffectCause, List <CombatEffect>> effects, boolean isPowered) {
+	public GenesisGuardian(String uniqueTag, String customName, Map<List<Drops>, Double> drops,Map <EffectCause, List <CombatEffect>> effects, boolean isElder) {
 		super(EntityType.CREEPER, uniqueTag, customName, drops,effects);
-		this.isPowered = isPowered;
+		this.isElder = isElder;
 	}
 
 	public LivingEntity spawnAt(Location loc) {
-		Creeper creeper = (Creeper) super.spawnAt(loc);
-		creeper.setPowered(isPowered);
-		return creeper;
+		Guardian guardian = (Guardian) super.spawnAt(loc);
+		guardian.setElder(isElder);
+		return guardian;
 	}
 
 	/**
-	 * @return Whether this creeper is powered
+	 * @return Whether this guardian is an elder
 	 */
-	public boolean isPowered() {
-		return isPowered;
+	public boolean isElder() {
+		return isElder;
 	}
 }

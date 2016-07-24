@@ -1,6 +1,7 @@
 package com.github.maxopoly.Genesis;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,6 +15,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Rabbit;
+import org.bukkit.entity.Skeleton.SkeletonType;
 import org.bukkit.inventory.ItemStack;
 
 import vg.civcraft.mc.civmodcore.areas.IArea;
@@ -39,6 +41,7 @@ import com.github.maxopoly.Genesis.entities.hostile.GenesisBlaze;
 import com.github.maxopoly.Genesis.entities.hostile.GenesisCaveSpider;
 import com.github.maxopoly.Genesis.entities.hostile.GenesisCreeper;
 import com.github.maxopoly.Genesis.entities.hostile.GenesisEnderman;
+import com.github.maxopoly.Genesis.entities.hostile.GenesisGuardian;
 import com.github.maxopoly.Genesis.entities.hostile.GenesisSpider;
 import com.github.maxopoly.Genesis.entities.hostile.human.GenesisSkeleton;
 import com.github.maxopoly.Genesis.entities.hostile.human.GenesisZombie;
@@ -46,6 +49,7 @@ import com.github.maxopoly.Genesis.entities.hostile.human.GenesisZombiePigman;
 import com.github.maxopoly.Genesis.entities.splitables.GenesisMagmaCube;
 import com.github.maxopoly.Genesis.entities.splitables.GenesisSlime;
 import com.github.maxopoly.Genesis.listener.SpawnPreventionListener;
+import com.github.maxopoly.Genesis.misc.Drops;
 import com.github.maxopoly.Genesis.spawning.SpawnFinder;
 
 public class ConfigParser {
@@ -62,10 +66,11 @@ public class ConfigParser {
 		plugin.reloadConfig();
 		FileConfiguration config = plugin.getConfig();
 		parseSpawnFinders(config.getConfigurationSection("spawns"));
-		boolean disableNormalSpawns = config.getBoolean("disableNaturalSpawns", false);
+		boolean disableNormalSpawns = config.getBoolean("disableNaturalSpawns",
+				false);
 		if (disableNormalSpawns) {
 			new SpawnPreventionListener(true);
-			//will register itself
+			// will register itself
 		}
 	}
 
@@ -130,7 +135,8 @@ public class ConfigParser {
 						+ current.getCurrentPath() + ". Skipping it");
 				continue;
 			}
-			long spawnDelay = ConfigParsing.parseTime(current.getString("spawnDelay", "1m"));
+			long spawnDelay = ConfigParsing.parseTime(current.getString(
+					"spawnDelay", "1m"));
 			// default once a minute
 
 			Genesis.getManager().registerSpawnFinder(
@@ -180,6 +186,8 @@ public class ConfigParser {
 						+ current.getCurrentPath() + ". Skipping it.");
 				continue;
 			}
+			Map<List<Drops>, Double> drops = parseDrops(current
+					.getConfigurationSection("drops"));
 			String customName = current.getString("customName");
 
 			Map<EffectCause, List<CombatEffect>> effects = parseCombatEffects(current
@@ -188,27 +196,35 @@ public class ConfigParser {
 			// normal hostiles
 			case CREEPER:
 				boolean isPowered = current.getBoolean("powered", false);
-				result = new GenesisCreeper(uniqueTag, customName, effects,
-						isPowered);
+				result = new GenesisCreeper(uniqueTag, customName, drops,
+						effects, isPowered);
 				break;
 			case BLAZE:
-				result = new GenesisBlaze(uniqueTag, customName, effects);
+				result = new GenesisBlaze(uniqueTag, customName, drops, effects);
 				break;
 			case CAVE_SPIDER:
-				result = new GenesisCaveSpider(uniqueTag, customName, effects);
+				result = new GenesisCaveSpider(uniqueTag, customName, drops,
+						effects);
+				break;
+			case GUARDIAN:
+				boolean isElder = current.getBoolean("isElder", false);
+				result = new GenesisGuardian(uniqueTag, customName, drops,
+						effects, isElder);
 				break;
 			case ENDERMAN:
-				result = new GenesisEnderman(uniqueTag, customName, effects);
+				result = new GenesisEnderman(uniqueTag, customName, drops,
+						effects);
 				break;
 			case SPIDER:
-				result = new GenesisSpider(uniqueTag, customName, effects);
+				result = new GenesisSpider(uniqueTag, customName, drops,
+						effects);
 				break;
 			// ambient
 			case SQUID:
-				result = new GenesisSquid(uniqueTag, customName, effects);
+				result = new GenesisSquid(uniqueTag, customName, drops, effects);
 				break;
 			case BAT:
-				result = new GenesisBat(uniqueTag, customName, effects);
+				result = new GenesisBat(uniqueTag, customName, drops, effects);
 				break;
 			// human entities
 			case ZOMBIE:
@@ -264,29 +280,41 @@ public class ConfigParser {
 							.getDouble("dropChance", 0.0);
 				}
 				if (type == EntityType.SKELETON) {
-					boolean wither = current
-							.getBoolean("witherSkeleton", false);
-					result = new GenesisSkeleton(uniqueTag, customName,
+					String skeleTypeString = current.getString("skeletonType",
+							"NORMAL");
+					SkeletonType skeleType;
+					try {
+						skeleType = SkeletonType.valueOf(skeleTypeString);
+					} catch (IllegalArgumentException e) {
+						plugin.warning("Found invalid skeleton type specified at "
+								+ current.getCurrentPath()
+								+ ". "
+								+ skeleTypeString
+								+ " couldnt be parsed and was defaulted to NORMAL");
+						skeleType = SkeletonType.NORMAL;
+					}
+					result = new GenesisSkeleton(uniqueTag, customName, drops,
 							effects, helmet, chestPlate, leggings, boots, hand,
 							helmetDropChance, chestPlateDropChance,
 							leggingsDropChance, bootsDropChance,
-							handDropChance, canPickupItems, wither);
+							handDropChance, canPickupItems, skeleType);
 				} else {
 					boolean child = current.getBoolean("child", false);
 					if (type == EntityType.PIG_ZOMBIE) {
 						int initialAnger = current.getInt("initialAnger", 0);
 						result = new GenesisZombiePigman(uniqueTag, customName,
-								effects, helmet, chestPlate, leggings, boots,
-								hand, helmetDropChance, chestPlateDropChance,
-								leggingsDropChance, bootsDropChance,
-								handDropChance, canPickupItems, child,
-								initialAnger);
+								drops, effects, helmet, chestPlate, leggings,
+								boots, hand, helmetDropChance,
+								chestPlateDropChance, leggingsDropChance,
+								bootsDropChance, handDropChance,
+								canPickupItems, child, initialAnger);
 					} else { // Zombie
 						result = new GenesisZombie(uniqueTag, customName,
-								effects, helmet, chestPlate, leggings, boots,
-								hand, helmetDropChance, chestPlateDropChance,
-								leggingsDropChance, bootsDropChance,
-								handDropChance, canPickupItems, child);
+								drops, effects, helmet, chestPlate, leggings,
+								boots, hand, helmetDropChance,
+								chestPlateDropChance, leggingsDropChance,
+								bootsDropChance, handDropChance,
+								canPickupItems, child);
 					}
 				}
 				break;
@@ -304,12 +332,12 @@ public class ConfigParser {
 				boolean isBaby = current.getBoolean("child", false);
 				switch (type) {
 				case CHICKEN:
-					result = new GenesisChicken(uniqueTag, customName, effects,
-							ageLocked, isBaby);
+					result = new GenesisChicken(uniqueTag, customName, drops,
+							effects, ageLocked, isBaby);
 					break;
 				case COW:
-					result = new GenesisCow(uniqueTag, customName, effects,
-							ageLocked, isBaby);
+					result = new GenesisCow(uniqueTag, customName, drops,
+							effects, ageLocked, isBaby);
 					break;
 				case HORSE:
 					Map<String, Double> color = parseDynamicChanceMap(current,
@@ -360,13 +388,13 @@ public class ConfigParser {
 					boolean hasChest = current.getBoolean("hasChest", false);
 					int maximumDomestication = current.getInt(
 							"maximumDomestication", -1);
-					result = new GenesisHorse(uniqueTag, customName, effects,
-							ageLocked, isBaby, colors, styles, variants,
-							hasChest, maximumDomestication);
+					result = new GenesisHorse(uniqueTag, customName, drops,
+							effects, ageLocked, isBaby, colors, styles,
+							variants, hasChest, maximumDomestication);
 					break;
 				case MUSHROOM_COW:
 					result = new GenesisMushroomCow(uniqueTag, customName,
-							effects, ageLocked, isBaby);
+							drops, effects, ageLocked, isBaby);
 					break;
 				case OCELOT:
 					Map<String, Double> oceTypes = parseDynamicChanceMap(
@@ -384,13 +412,13 @@ public class ConfigParser {
 						}
 						oceType.put(tempCol, entry.getValue());
 					}
-					result = new GenesisOcelot(uniqueTag, customName, effects,
-							ageLocked, isBaby, oceType);
+					result = new GenesisOcelot(uniqueTag, customName, drops,
+							effects, ageLocked, isBaby, oceType);
 					break;
 				case PIG:
 					boolean hasSaddle = current.getBoolean("hasSaddle", false);
-					result = new GenesisPig(uniqueTag, customName, effects,
-							ageLocked, isBaby, hasSaddle);
+					result = new GenesisPig(uniqueTag, customName, drops,
+							effects, ageLocked, isBaby, hasSaddle);
 					break;
 				case RABBIT:
 					Map<String, Double> rabbitTypes = parseDynamicChanceMap(
@@ -408,8 +436,8 @@ public class ConfigParser {
 						}
 						rabbitType.put(tempCol, entry.getValue());
 					}
-					result = new GenesisRabbit(uniqueTag, customName, effects,
-							ageLocked, isBaby, rabbitType);
+					result = new GenesisRabbit(uniqueTag, customName, drops,
+							effects, ageLocked, isBaby, rabbitType);
 					break;
 				case WOLF:
 					Map<String, Double> dogColors = parseDynamicChanceMap(
@@ -427,8 +455,8 @@ public class ConfigParser {
 						}
 						dogColor.put(tempCol, entry.getValue());
 					}
-					result = new GenesisWolf(uniqueTag, customName, effects,
-							ageLocked, isBaby, dogColor);
+					result = new GenesisWolf(uniqueTag, customName, drops,
+							effects, ageLocked, isBaby, dogColor);
 					break;
 				case SHEEP:
 					Map<String, Double> sheepColors = parseDynamicChanceMap(
@@ -447,8 +475,8 @@ public class ConfigParser {
 						sheepColor.put(tempCol, entry.getValue());
 					}
 					boolean sheared = current.getBoolean("isSheared", false);
-					result = new GenesisSheep(uniqueTag, customName, effects,
-							ageLocked, isBaby, sheared, sheepColor);
+					result = new GenesisSheep(uniqueTag, customName, drops,
+							effects, ageLocked, isBaby, sheared, sheepColor);
 					break;
 				case SLIME:
 				case MAGMA_CUBE:
@@ -458,13 +486,13 @@ public class ConfigParser {
 					boolean dropOnSize1 = current.getBoolean("dropOnSize1");
 					int childrenCount = current.getInt("childrenAmount", 3);
 					if (type == EntityType.SLIME) {
-						result = new GenesisSlime(uniqueTag, customName,
+						result = new GenesisSlime(uniqueTag, customName, drops,
 								effects, childrenCount, size, recursiveSplit,
 								dropOnSize1);
 					} else { // magma cube
 						result = new GenesisMagmaCube(uniqueTag, customName,
-								effects, childrenCount, size, recursiveSplit,
-								dropOnSize1);
+								drops, effects, childrenCount, size,
+								recursiveSplit, dropOnSize1);
 					}
 				}
 				break;
@@ -474,6 +502,59 @@ public class ConfigParser {
 			}
 		}
 		return entities;
+	}
+
+	private Map<List<Drops>, Double> parseDrops(ConfigurationSection config) {
+		if (config == null) {
+			return null;
+		}
+		double totalChance = 0.0;
+		Map<List<Drops>, Double> dropMap = new HashMap<List<Drops>, Double>();
+		for (String key : config.getKeys(false)) {
+			ConfigurationSection current = config.getConfigurationSection(key);
+			if (current == null) {
+				plugin.warning("Found invalid key " + key + " at "
+						+ config.getCurrentPath());
+				continue;
+			}
+			double chance = current.getDouble("chance");
+			totalChance += chance;
+			ConfigurationSection items = current
+					.getConfigurationSection("items");
+			if (items == null) {
+				plugin.warning("No items specified at "
+						+ current.getCurrentPath() + ". Skipping it");
+				continue;
+			}
+			List<Drops> drops = new ArrayList<Drops>();
+			for (String itemKey : items.getKeys(false)) {
+				ConfigurationSection currentItem = items
+						.getConfigurationSection(itemKey);
+				if (currentItem == null) {
+					plugin.warning("Found invalid key " + itemKey + " at "
+							+ items.getCurrentPath());
+					continue;
+				}
+				ItemMap im = ConfigParsing.parseItemMapDirectly(currentItem);
+				if (im.getTotalItemAmount() == 0) {
+					plugin.warning("No actual items specified at "
+							+ currentItem.getCurrentPath());
+					continue;
+				}
+				ItemStack is = im.getItemStackRepresentation().get(0);
+				int lowerLimit = currentItem.getInt("lowerLimit", 0);
+				int upperLimit = currentItem.getInt("upperLimit", 5);
+				Drops d = new Drops(is, lowerLimit, upperLimit);
+				drops.add(d);
+			}
+			dropMap.put(drops, chance);
+		}
+		if (Math.abs(totalChance - 1.0) > 0.0000001) {
+			plugin.warning("Chances for drops at "
+					+ config.getCurrentPath()
+					+ " dont add up to 1.0 properly, they may not work as inteded");
+		}
+		return dropMap;
 	}
 
 	private List<Material> parseMaterialList(ConfigurationSection config,

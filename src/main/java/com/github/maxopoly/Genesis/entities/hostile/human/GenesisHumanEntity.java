@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
 import com.github.maxopoly.Genesis.combatEffects.EffectCause;
 import com.github.maxopoly.Genesis.entities.GenesisLivingEntity;
+import com.github.maxopoly.Genesis.misc.Drops;
 
 public abstract class GenesisHumanEntity extends GenesisLivingEntity {
 
@@ -30,13 +31,14 @@ public abstract class GenesisHumanEntity extends GenesisLivingEntity {
 	private boolean canPickUpItems;
 
 	public GenesisHumanEntity(EntityType entityType, String uniqueTag,
-			String customName, Map<EffectCause, List<CombatEffect>> effects,
-			ItemStack helmetSlot, ItemStack chestSlot, ItemStack pantSlot,
-			ItemStack bootSlot, ItemStack handSlot, double helmetDropChance,
+			String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects, ItemStack helmetSlot,
+			ItemStack chestSlot, ItemStack pantSlot, ItemStack bootSlot,
+			ItemStack handSlot, double helmetDropChance,
 			double chestplateDropChance, double leggingsDropChance,
 			double bootsDropChance, double handDropChance,
 			boolean canPickupItems) {
-		super(entityType, uniqueTag, customName, effects);
+		super(entityType, uniqueTag, customName, drops, effects);
 		this.helmetDropChance = helmetDropChance;
 		this.chestPlateDropChance = chestplateDropChance;
 		this.pantsDropChance = leggingsDropChance;

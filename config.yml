@@ -1,0 +1,11 @@
+disableNaturalSpawns: true
+spawns:
+  spawnAreas:
+    main:
+      type: GLOBAL
+  spawnDelay: 1m
+  entities:
+    zombie:
+      type: ZOMBIE
+      tag: zombiehalt
+      customName: SuperZombie

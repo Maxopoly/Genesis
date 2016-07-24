@@ -15,6 +15,9 @@ public class RandomSelector <Thing> {
 	 * @param map Map containing Objects and their respective chances
 	 */
 	public Thing pickRandomly(Map<Thing, Double> map) {
+		if (map == null) {
+			return null;
+		}
 		Random rng = new Random();
 		double val = rng.nextDouble();
 		double sum = 0;

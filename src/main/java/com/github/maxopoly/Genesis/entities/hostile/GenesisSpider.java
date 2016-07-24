@@ -8,11 +8,12 @@ import org.bukkit.entity.EntityType;
 import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
 import com.github.maxopoly.Genesis.combatEffects.EffectCause;
 import com.github.maxopoly.Genesis.entities.GenesisLivingEntity;
+import com.github.maxopoly.Genesis.misc.Drops;
 
 public class GenesisSpider extends GenesisLivingEntity {
 	
-	public GenesisSpider(String uniqueTag, String customName, Map <EffectCause, List <CombatEffect>> effects) {
-		super(EntityType.SPIDER, uniqueTag, customName, effects);
+	public GenesisSpider(String uniqueTag, String customName, Map<List<Drops>, Double> drops,Map <EffectCause, List <CombatEffect>> effects) {
+		super(EntityType.SPIDER, uniqueTag, customName, drops,effects);
 	}
 
 }
