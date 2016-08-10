@@ -134,7 +134,7 @@ public class SpawnFinder implements Runnable {
 			if (foundRange > 0 && isBlockToSpawnIn(b.getType())) {
 				boolean sidewardsConditionFullFilled = true;
 				// check sidewards
-				for (int i = 1; i <= extraSpawnInSpaceSidewards; i++) {
+				for (int i = 1; i <= extraSpawnInSpaceSidewards && sidewardsConditionFullFilled == true; i++) {
 					for (BlockFace bf : cardinalDirections) {
 						Block relative = b.getRelative(bf, 1);
 						if (!isBlockToSpawnIn(relative.getType())) {
