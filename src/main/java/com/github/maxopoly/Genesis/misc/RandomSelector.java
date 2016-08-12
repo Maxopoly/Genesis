@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
-public class RandomSelector <Thing> {
+public class RandomSelector<Thing> {
 
 	/**
 	 * Randomly picks an element out of a given map, where the value in the map
@@ -12,7 +12,8 @@ public class RandomSelector <Thing> {
 	 * the map should be 1.0, otherwise this method may return null because no
 	 * element was selected
 	 * 
-	 * @param map Map containing Objects and their respective chances
+	 * @param map
+	 *            Map containing Objects and their respective chances
 	 */
 	public Thing pickRandomly(Map<Thing, Double> map) {
 		if (map == null) {

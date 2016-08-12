@@ -17,8 +17,9 @@ public class GenesisGuardian extends GenesisLivingEntity {
 
 	private boolean isElder;
 
-	public GenesisGuardian(String uniqueTag, String customName, Map<List<Drops>, Double> drops,Map <EffectCause, List <CombatEffect>> effects, boolean isElder) {
-		super(EntityType.CREEPER, uniqueTag, customName, drops,effects);
+	public GenesisGuardian(String uniqueTag, String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects, boolean isElder) {
+		super(EntityType.CREEPER, uniqueTag, customName, drops, effects);
 		this.isElder = isElder;
 	}
 

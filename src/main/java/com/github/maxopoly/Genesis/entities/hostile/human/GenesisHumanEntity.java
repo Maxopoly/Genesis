@@ -30,13 +30,10 @@ public abstract class GenesisHumanEntity extends GenesisLivingEntity {
 
 	private boolean canPickUpItems;
 
-	public GenesisHumanEntity(EntityType entityType, String uniqueTag,
-			String customName, Map<List<Drops>, Double> drops,
-			Map<EffectCause, List<CombatEffect>> effects, ItemStack helmetSlot,
-			ItemStack chestSlot, ItemStack pantSlot, ItemStack bootSlot,
-			ItemStack handSlot, double helmetDropChance,
-			double chestplateDropChance, double leggingsDropChance,
-			double bootsDropChance, double handDropChance,
+	public GenesisHumanEntity(EntityType entityType, String uniqueTag, String customName,
+			Map<List<Drops>, Double> drops, Map<EffectCause, List<CombatEffect>> effects, ItemStack helmetSlot,
+			ItemStack chestSlot, ItemStack pantSlot, ItemStack bootSlot, ItemStack handSlot, double helmetDropChance,
+			double chestplateDropChance, double leggingsDropChance, double bootsDropChance, double handDropChance,
 			boolean canPickupItems) {
 		super(entityType, uniqueTag, customName, drops, effects);
 		this.helmetDropChance = helmetDropChance;

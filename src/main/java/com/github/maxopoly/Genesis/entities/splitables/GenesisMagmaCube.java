@@ -11,11 +11,8 @@ import com.github.maxopoly.Genesis.misc.Drops;
 
 public class GenesisMagmaCube extends GenesisSplitableEntity {
 
-	public GenesisMagmaCube(String uniqueTag, String customName,
-			Map<List<Drops>, Double> drops,
-			Map<EffectCause, List<CombatEffect>> effects, int childrenCount,
-			int initialSize, boolean recursiveSplit, boolean onlyDropOnSize1) {
-		super(EntityType.MAGMA_CUBE, uniqueTag, customName, drops, effects,
-				childrenCount, initialSize, recursiveSplit, onlyDropOnSize1);
+	public GenesisMagmaCube(String uniqueTag, String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects, int childrenCount, int initialSize, boolean recursiveSplit) {
+		super(EntityType.MAGMA_CUBE, uniqueTag, customName, drops, effects, childrenCount, initialSize, recursiveSplit);
 	}
 }

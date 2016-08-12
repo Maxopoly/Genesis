@@ -24,9 +24,8 @@ public abstract class GenesisLivingEntity {
 
 	private String uniqueTag;
 
-	public GenesisLivingEntity(EntityType entityType, String uniqueTag,
-			String customName, Map<List<Drops>, Double> drops,
-			Map<EffectCause, List<CombatEffect>> effects) {
+	public GenesisLivingEntity(EntityType entityType, String uniqueTag, String customName,
+			Map<List<Drops>, Double> drops, Map<EffectCause, List<CombatEffect>> effects) {
 		this.entityType = entityType;
 		this.customName = customName;
 		this.effects = effects;
@@ -36,8 +35,7 @@ public abstract class GenesisLivingEntity {
 	}
 
 	public LivingEntity spawnAt(Location loc) {
-		LivingEntity l = (LivingEntity) loc.getWorld().spawnEntity(loc,
-				entityType);
+		LivingEntity l = (LivingEntity) loc.getWorld().spawnEntity(loc, entityType);
 		if (customName != null) {
 			l.setCustomName(customName);
 		}

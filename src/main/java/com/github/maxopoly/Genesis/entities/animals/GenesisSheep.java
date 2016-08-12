@@ -22,20 +22,19 @@ public class GenesisSheep extends GenesisAnimal {
 
 	private Map<DyeColor, Double> colors;
 
-	public GenesisSheep(String uniqueTag, String customName,
-			Map<List<Drops>, Double> drops,
-			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked,
-			boolean isBaby, boolean isSheared, Map<DyeColor, Double> types) {
-		super(EntityType.SHEEP, uniqueTag, customName, drops, effects,
-				ageLocked, isBaby);
+	public GenesisSheep(String uniqueTag, String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked, boolean isBaby, boolean isSheared,
+			Map<DyeColor, Double> types) {
+		super(EntityType.SHEEP, uniqueTag, customName, drops, effects, ageLocked, isBaby);
 		this.isSheared = isSheared;
 		this.colors = types;
-		this.colorSelector = new RandomSelector<DyeColor>();
+		colorSelector = new RandomSelector<DyeColor>();
 	}
 
 	public LivingEntity spawnAt(Location loc) {
 		Sheep sheep = (Sheep) super.spawnAt(loc);
 		sheep.setSheared(isSheared);
+		sheep.setColor(colorSelector.pickRandomly(colors));
 		if (colors != null) {
 			DyeColor color = colorSelector.pickRandomly(colors);
 			if (color != null) {

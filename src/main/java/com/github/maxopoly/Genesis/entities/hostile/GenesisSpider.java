@@ -11,9 +11,10 @@ import com.github.maxopoly.Genesis.entities.GenesisLivingEntity;
 import com.github.maxopoly.Genesis.misc.Drops;
 
 public class GenesisSpider extends GenesisLivingEntity {
-	
-	public GenesisSpider(String uniqueTag, String customName, Map<List<Drops>, Double> drops,Map <EffectCause, List <CombatEffect>> effects) {
-		super(EntityType.SPIDER, uniqueTag, customName, drops,effects);
+
+	public GenesisSpider(String uniqueTag, String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects) {
+		super(EntityType.SPIDER, uniqueTag, customName, drops, effects);
 	}
 
 }

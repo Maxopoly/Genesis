@@ -10,9 +10,9 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import com.github.maxopoly.Genesis.Genesis;
 
 public class SpawnPreventionListener implements Listener {
-	
+
 	private boolean cancelNaturalSpawns;
-	
+
 	public SpawnPreventionListener(boolean cancelNaturalSpawns) {
 		this.cancelNaturalSpawns = cancelNaturalSpawns;
 		Bukkit.getPluginManager().registerEvents(this, Genesis.getInstance());

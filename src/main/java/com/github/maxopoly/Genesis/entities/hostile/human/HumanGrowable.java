@@ -5,7 +5,7 @@ package com.github.maxopoly.Genesis.entities.hostile.human;
  *
  */
 public interface HumanGrowable {
-	
+
 	public boolean isChild();
-	
+
 }

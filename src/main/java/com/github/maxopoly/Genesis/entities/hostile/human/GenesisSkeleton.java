@@ -18,18 +18,14 @@ public class GenesisSkeleton extends GenesisHumanEntity {
 
 	private SkeletonType skeletonType;
 
-	public GenesisSkeleton(String uniqueTag, String customName,
-			Map<List<Drops>, Double> drops,
-			Map<EffectCause, List<CombatEffect>> effects, ItemStack helmetSlot,
-			ItemStack chestSlot, ItemStack pantSlot, ItemStack bootSlot,
-			ItemStack handSlot, double helmetDropChance,
-			double chestplateDropChance, double leggingsDropChance,
-			double bootsDropChance, double handDropChance,
+	public GenesisSkeleton(String uniqueTag, String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects, ItemStack helmetSlot, ItemStack chestSlot,
+			ItemStack pantSlot, ItemStack bootSlot, ItemStack handSlot, double helmetDropChance,
+			double chestplateDropChance, double leggingsDropChance, double bootsDropChance, double handDropChance,
 			boolean canPickupItems, SkeletonType skeletonType) {
-		super(EntityType.SKELETON, uniqueTag, customName, drops, effects,
-				helmetSlot, chestSlot, pantSlot, bootSlot, handSlot,
-				helmetDropChance, chestplateDropChance, leggingsDropChance,
-				bootsDropChance, handDropChance, canPickupItems);
+		super(EntityType.SKELETON, uniqueTag, customName, drops, effects, helmetSlot, chestSlot, pantSlot, bootSlot,
+				handSlot, helmetDropChance, chestplateDropChance, leggingsDropChance, bootsDropChance, handDropChance,
+				canPickupItems);
 		this.skeletonType = skeletonType;
 	}
 

@@ -47,13 +47,10 @@ public class SpawnFinder implements Runnable {
 	private int PID;
 	private long spawnDelay;
 
-	public SpawnFinder(List<Material> blocksToSpawnOn,
-			List<Material> blocksNotToSpawnOn, List<Material> blocksToSpawnIn,
-			List<IArea> spawnAreas, int chunkSpawnRange,
-			int minimumLightLevelRequired, int maximumLightLevelAllowed,
-			int spawnInSpaceUpwards, int extraSpawnInSpaceSidewards,
-			int attempts, int minimumY, int maximumY, double spawnChance,
-			List<GenesisLivingEntity> entities, long spawnDelay) {
+	public SpawnFinder(List<Material> blocksToSpawnOn, List<Material> blocksNotToSpawnOn,
+			List<Material> blocksToSpawnIn, List<IArea> spawnAreas, int chunkSpawnRange, int minimumLightLevelRequired,
+			int maximumLightLevelAllowed, int spawnInSpaceUpwards, int extraSpawnInSpaceSidewards, int attempts,
+			int minimumY, int maximumY, double spawnChance, List<GenesisLivingEntity> entities, long spawnDelay) {
 		this.blocksNotToSpawnOn = blocksNotToSpawnOn;
 		this.blocksToSpawnIn = blocksToSpawnIn;
 		this.blocksToSpawnOn = blocksToSpawnOn;
@@ -77,8 +74,7 @@ public class SpawnFinder implements Runnable {
 			cardinalDirections.add(BlockFace.WEST);
 		}
 		this.spawnDelay = spawnDelay;
-		this.PID = Bukkit.getScheduler().scheduleSyncRepeatingTask(
-				Genesis.getInstance(), this, spawnDelay, spawnDelay);
+		this.PID = Bukkit.getScheduler().scheduleSyncRepeatingTask(Genesis.getInstance(), this, spawnDelay, spawnDelay);
 	}
 
 	@Override
@@ -87,13 +83,11 @@ public class SpawnFinder implements Runnable {
 			Location playerLoc = p.getLocation();
 			for (IArea area : spawnAreas) {
 				if (area.isInArea(playerLoc)) {
-					Chunk c = playerLoc
-							.getWorld()
-							.getChunkAt(
-									(int) (playerLoc.getChunk().getX()
-											+ (Math.round((rng.nextDouble() - 0.5) * 2.0 * chunkSpawnRange))),
-									(int) (playerLoc.getChunk().getZ()
-											+ (Math.round((rng.nextDouble() - 0.5) * 2.0 * chunkSpawnRange))));
+					Chunk c = playerLoc.getWorld().getChunkAt(
+							(int) (playerLoc.getChunk().getX() + (Math.round((rng.nextDouble() - 0.5) * 2.0
+									* chunkSpawnRange))),
+							(int) (playerLoc.getChunk().getZ() + (Math.round((rng.nextDouble() - 0.5) * 2.0
+									* chunkSpawnRange))));
 					attemptToSpawn(c);
 					break;
 				}
@@ -106,9 +100,7 @@ public class SpawnFinder implements Runnable {
 			return;
 		}
 		for (int i = 0; i < attempts; i++) {
-			Location loc = findLocation(c.getWorld(),
-					c.getX() * 16 + rng.nextInt(16),
-					c.getZ() * 16 + rng.nextInt(16));
+			Location loc = findLocation(c.getWorld(), c.getX() * 16 + rng.nextInt(16), c.getZ() * 16 + rng.nextInt(16));
 			if (loc != null) {
 				spawnEntities(loc);
 				break;
@@ -149,8 +141,7 @@ public class SpawnFinder implements Runnable {
 				}
 				// if we are at first block above the solid, check for light
 				if (foundRange == 1) {
-					if (b.getLightLevel() > maximumLightLevelAllowed
-							|| b.getLightLevel() < minimumLightLevelRequired) {
+					if (b.getLightLevel() > maximumLightLevelAllowed || b.getLightLevel() < minimumLightLevelRequired) {
 						foundRange = 0;
 						continue;
 					}
@@ -160,8 +151,7 @@ public class SpawnFinder implements Runnable {
 					validY.add((y - (int) Math.ceil(spawnInSpaceUpwards * 0.5)));
 					foundRange = 0;
 				}
-			}
-			else {
+			} else {
 				foundRange = 0;
 			}
 		}
@@ -172,10 +162,8 @@ public class SpawnFinder implements Runnable {
 	}
 
 	private boolean isBlockToSpawnOn(Material m) {
-		return ((blocksToSpawnOn == null
-				&& m.isSolid()
-				&& (blocksNotToSpawnOn == null || !blocksNotToSpawnOn
-						.contains(m)) || (blocksToSpawnOn != null && blocksToSpawnOn
+		return ((blocksToSpawnOn == null && m.isSolid()
+				&& (blocksNotToSpawnOn == null || !blocksNotToSpawnOn.contains(m)) || (blocksToSpawnOn != null && blocksToSpawnOn
 				.contains(m))));
 	}
 

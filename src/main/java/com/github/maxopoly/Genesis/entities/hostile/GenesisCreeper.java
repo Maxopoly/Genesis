@@ -17,8 +17,9 @@ public class GenesisCreeper extends GenesisLivingEntity {
 
 	private boolean isPowered;
 
-	public GenesisCreeper(String uniqueTag, String customName, Map<List<Drops>, Double> drops,Map <EffectCause, List <CombatEffect>> effects, boolean isPowered) {
-		super(EntityType.CREEPER, uniqueTag, customName, drops,effects);
+	public GenesisCreeper(String uniqueTag, String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects, boolean isPowered) {
+		super(EntityType.CREEPER, uniqueTag, customName, drops, effects);
 		this.isPowered = isPowered;
 	}
 

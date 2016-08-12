@@ -11,7 +11,8 @@ import com.github.maxopoly.Genesis.entities.GenesisLivingEntity;
 import com.github.maxopoly.Genesis.misc.Drops;
 
 public class GenesisBat extends GenesisLivingEntity {
-	public GenesisBat(String uniqueTag, String customName, Map<List<Drops>, Double> drops, Map <EffectCause, List <CombatEffect>> effects) {
+	public GenesisBat(String uniqueTag, String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects) {
 		super(EntityType.BAT, uniqueTag, customName, drops, effects);
 	}
 }

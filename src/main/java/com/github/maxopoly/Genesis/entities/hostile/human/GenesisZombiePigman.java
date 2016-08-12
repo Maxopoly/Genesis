@@ -13,23 +13,18 @@ import com.github.maxopoly.Genesis.combatEffects.CombatEffect;
 import com.github.maxopoly.Genesis.combatEffects.EffectCause;
 import com.github.maxopoly.Genesis.misc.Drops;
 
-public class GenesisZombiePigman extends GenesisHumanEntity implements
-		HumanGrowable {
+public class GenesisZombiePigman extends GenesisHumanEntity implements HumanGrowable {
 	private boolean isChild;
 	private int initialAnger;
 
-	public GenesisZombiePigman(String uniqueTag, String customName,
-			Map<List<Drops>, Double> drops,
-			Map<EffectCause, List<CombatEffect>> effects, ItemStack helmetSlot,
-			ItemStack chestSlot, ItemStack pantSlot, ItemStack bootSlot,
-			ItemStack handSlot, double helmetDropChance,
-			double chestplateDropChance, double leggingsDropChance,
-			double bootsDropChance, double handDropChance,
+	public GenesisZombiePigman(String uniqueTag, String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects, ItemStack helmetSlot, ItemStack chestSlot,
+			ItemStack pantSlot, ItemStack bootSlot, ItemStack handSlot, double helmetDropChance,
+			double chestplateDropChance, double leggingsDropChance, double bootsDropChance, double handDropChance,
 			boolean canPickupItems, boolean child, int initialAnger) {
-		super(EntityType.PIG_ZOMBIE, uniqueTag, customName, drops, effects,
-				helmetSlot, chestSlot, pantSlot, bootSlot, handSlot,
-				helmetDropChance, chestplateDropChance, leggingsDropChance,
-				bootsDropChance, handDropChance, canPickupItems);
+		super(EntityType.PIG_ZOMBIE, uniqueTag, customName, drops, effects, helmetSlot, chestSlot, pantSlot, bootSlot,
+				handSlot, helmetDropChance, chestplateDropChance, leggingsDropChance, bootsDropChance, handDropChance,
+				canPickupItems);
 		this.isChild = child;
 		this.initialAnger = initialAnger;
 	}

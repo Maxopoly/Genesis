@@ -11,9 +11,9 @@ import com.github.maxopoly.Genesis.misc.Drops;
 
 public class GenesisSlime extends GenesisSplitableEntity {
 
-	public GenesisSlime(String uniqueTag, String customName, Map<List<Drops>, Double> drops,Map <EffectCause, List <CombatEffect>> effects, int childrenCount,
-			int initialSize, boolean recursiveSplit, boolean onlyDropOnSize1) {
-		super(EntityType.SLIME, uniqueTag, customName, drops, effects, childrenCount, initialSize, recursiveSplit, onlyDropOnSize1);
+	public GenesisSlime(String uniqueTag, String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects, int childrenCount, int initialSize, boolean recursiveSplit) {
+		super(EntityType.SLIME, uniqueTag, customName, drops, effects, childrenCount, initialSize, recursiveSplit);
 	}
 
 }

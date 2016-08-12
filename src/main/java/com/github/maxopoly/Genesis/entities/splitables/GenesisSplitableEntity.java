@@ -18,17 +18,13 @@ public abstract class GenesisSplitableEntity extends GenesisLivingEntity {
 	private int childrenCount;
 	private int initialSize;
 	private boolean recursiveSplit;
-	private boolean onlyDropOnSize1;
 
-	public GenesisSplitableEntity(EntityType type, String uniqueTag,
-			String customName, Map<List<Drops>, Double> drops,
-			Map<EffectCause, List<CombatEffect>> effects, int childrenCount,
-			int initialSize, boolean recursiveSplit, boolean onlyDropOnSize1) {
+	public GenesisSplitableEntity(EntityType type, String uniqueTag, String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects, int childrenCount, int initialSize, boolean recursiveSplit) {
 		super(type, uniqueTag, customName, drops, effects);
 		this.childrenCount = childrenCount;
 		this.initialSize = initialSize;
 		this.recursiveSplit = recursiveSplit;
-		this.onlyDropOnSize1 = onlyDropOnSize1;
 	}
 
 	public LivingEntity spawnAt(Location loc) {
@@ -47,9 +43,5 @@ public abstract class GenesisSplitableEntity extends GenesisLivingEntity {
 
 	public boolean getRecursiveSplit() {
 		return recursiveSplit;
-	}
-
-	public boolean getDropOnSize1Only() {
-		return onlyDropOnSize1;
 	}
 }

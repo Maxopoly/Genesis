@@ -12,8 +12,9 @@ import com.github.maxopoly.Genesis.misc.Drops;
 
 public class GenesisEnderman extends GenesisLivingEntity {
 
-	public GenesisEnderman(String uniqueTag, String customName, Map<List<Drops>, Double> drops,Map <EffectCause, List <CombatEffect>> effects) {
-		super(EntityType.ENDERMAN, uniqueTag, customName, drops,effects);
+	public GenesisEnderman(String uniqueTag, String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects) {
+		super(EntityType.ENDERMAN, uniqueTag, customName, drops, effects);
 	}
 
 }

@@ -18,10 +18,8 @@ public class GenesisAnimal extends GenesisLivingEntity {
 	private boolean ageLocked;
 	private boolean isBaby;
 
-	public GenesisAnimal(EntityType entityType, String uniqueTag,
-			String customName, Map<List<Drops>, Double> drops,
-			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked,
-			boolean isBaby) {
+	public GenesisAnimal(EntityType entityType, String uniqueTag, String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked, boolean isBaby) {
 		super(entityType, uniqueTag, customName, drops, effects);
 		this.ageLocked = ageLocked;
 		this.isBaby = isBaby;

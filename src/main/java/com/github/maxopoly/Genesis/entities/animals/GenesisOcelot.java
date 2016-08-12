@@ -14,20 +14,19 @@ import com.github.maxopoly.Genesis.misc.Drops;
 import com.github.maxopoly.Genesis.misc.RandomSelector;
 
 public class GenesisOcelot extends GenesisAnimal {
-	
+
 	private static RandomSelector<Ocelot.Type> typeSelector;
-	
+
 	private Map<Ocelot.Type, Double> types;
 
-	public GenesisOcelot(String uniqueTag, String customName,Map<List<Drops>, Double> drops,
-			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked,
-			boolean isBaby, Map<Ocelot.Type, Double> types) {
-		super(EntityType.OCELOT, uniqueTag, customName, drops,effects, ageLocked,
-				isBaby);
+	public GenesisOcelot(String uniqueTag, String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked, boolean isBaby,
+			Map<Ocelot.Type, Double> types) {
+		super(EntityType.OCELOT, uniqueTag, customName, drops, effects, ageLocked, isBaby);
 		this.types = types;
 		typeSelector = new RandomSelector<Ocelot.Type>();
 	}
-	
+
 	public LivingEntity spawnAt(Location loc) {
 		LivingEntity l = super.spawnAt(loc);
 		Ocelot oce = (Ocelot) l;

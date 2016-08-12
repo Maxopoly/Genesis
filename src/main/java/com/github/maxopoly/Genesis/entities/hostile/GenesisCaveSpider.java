@@ -12,8 +12,7 @@ import com.github.maxopoly.Genesis.misc.Drops;
 
 public class GenesisCaveSpider extends GenesisLivingEntity {
 
-	public GenesisCaveSpider(String uniqueTag, String customName,
-			Map<List<Drops>, Double> drops,
+	public GenesisCaveSpider(String uniqueTag, String customName, Map<List<Drops>, Double> drops,
 			Map<EffectCause, List<CombatEffect>> effects) {
 		super(EntityType.CAVE_SPIDER, uniqueTag, customName, drops, effects);
 	}

@@ -19,12 +19,10 @@ public class GenesisRabbit extends GenesisAnimal {
 
 	private Map<Rabbit.Type, Double> types;
 
-	public GenesisRabbit(String uniqueTag, String customName,
-			Map<List<Drops>, Double> drops,
-			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked,
-			boolean isBaby, Map<Rabbit.Type, Double> types) {
-		super(EntityType.RABBIT, uniqueTag, customName, drops, effects,
-				ageLocked, isBaby);
+	public GenesisRabbit(String uniqueTag, String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked, boolean isBaby,
+			Map<Rabbit.Type, Double> types) {
+		super(EntityType.RABBIT, uniqueTag, customName, drops, effects, ageLocked, isBaby);
 		this.types = types;
 		typeSelector = new RandomSelector<Rabbit.Type>();
 	}

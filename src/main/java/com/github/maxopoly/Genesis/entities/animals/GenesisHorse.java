@@ -26,14 +26,11 @@ public class GenesisHorse extends GenesisAnimal {
 	private boolean hasChest;
 	private int maximumDomestication;
 
-	public GenesisHorse(String uniqueTag, String customName,Map<List<Drops>, Double> drops,
-			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked,
-			boolean isBaby, Map<Horse.Color, Double> colors,
-			Map<Horse.Style, Double> styles,
-			Map<Horse.Variant, Double> variants, boolean hasChest,
-			int maximumDomestication) {
-		super(EntityType.HORSE, uniqueTag, customName, drops,effects, ageLocked,
-				isBaby);
+	public GenesisHorse(String uniqueTag, String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked, boolean isBaby,
+			Map<Horse.Color, Double> colors, Map<Horse.Style, Double> styles, Map<Horse.Variant, Double> variants,
+			boolean hasChest, int maximumDomestication) {
+		super(EntityType.HORSE, uniqueTag, customName, drops, effects, ageLocked, isBaby);
 		colorSelector = new RandomSelector<Horse.Color>();
 		styleSelector = new RandomSelector<Horse.Style>();
 		variantSelector = new RandomSelector<Horse.Variant>();

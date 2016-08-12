@@ -12,8 +12,7 @@ import com.github.maxopoly.Genesis.misc.Drops;
 
 public class GenesisBlaze extends GenesisLivingEntity {
 
-	public GenesisBlaze(String uniqueTag, String customName,
-			Map<List<Drops>, Double> drops,
+	public GenesisBlaze(String uniqueTag, String customName, Map<List<Drops>, Double> drops,
 			Map<EffectCause, List<CombatEffect>> effects) {
 		super(EntityType.BLAZE, uniqueTag, customName, drops, effects);
 	}

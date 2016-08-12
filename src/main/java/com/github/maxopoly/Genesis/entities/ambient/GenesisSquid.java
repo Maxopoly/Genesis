@@ -12,7 +12,8 @@ import com.github.maxopoly.Genesis.misc.Drops;
 
 public class GenesisSquid extends GenesisLivingEntity {
 
-	public GenesisSquid(String uniqueTag, String customName, Map<List<Drops>, Double> drops,Map <EffectCause, List <CombatEffect>> effects) {
+	public GenesisSquid(String uniqueTag, String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects) {
 		super(EntityType.SQUID, uniqueTag, customName, drops, effects);
 	}
 }

@@ -16,12 +16,9 @@ public class GenesisPig extends GenesisAnimal {
 
 	private boolean hasSaddle;
 
-	public GenesisPig(String uniqueTag, String customName,
-			Map<List<Drops>, Double> drops,
-			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked,
-			boolean isBaby, boolean hasSaddle) {
-		super(EntityType.PIG, uniqueTag, customName, drops, effects, ageLocked,
-				isBaby);
+	public GenesisPig(String uniqueTag, String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked, boolean isBaby, boolean hasSaddle) {
+		super(EntityType.PIG, uniqueTag, customName, drops, effects, ageLocked, isBaby);
 		this.hasSaddle = hasSaddle;
 	}
 

@@ -20,12 +20,10 @@ public class GenesisWolf extends GenesisAnimal {
 
 	private Map<DyeColor, Double> collarColors;
 
-	public GenesisWolf(String uniqueTag, String customName,
-			Map<List<Drops>, Double> drops,
-			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked,
-			boolean isBaby, Map<DyeColor, Double> collarColors) {
-		super(EntityType.WOLF, uniqueTag, customName, drops, effects,
-				ageLocked, isBaby);
+	public GenesisWolf(String uniqueTag, String customName, Map<List<Drops>, Double> drops,
+			Map<EffectCause, List<CombatEffect>> effects, boolean ageLocked, boolean isBaby,
+			Map<DyeColor, Double> collarColors) {
+		super(EntityType.WOLF, uniqueTag, customName, drops, effects, ageLocked, isBaby);
 		this.collarColors = collarColors;
 		colorSelector = new RandomSelector<DyeColor>();
 	}

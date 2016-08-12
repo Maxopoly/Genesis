@@ -28,8 +28,7 @@ public class EntityListener implements Listener {
 
 	@EventHandler(ignoreCancelled = true)
 	public void entitySpawn(EntitySpawnEvent e) {
-		GenesisLivingEntity gle = manager.getEntityConfig(e.getEntity()
-				.getUniqueId());
+		GenesisLivingEntity gle = manager.getEntityConfig(e.getEntity().getUniqueId());
 		if (gle != null) {
 			gle.triggerEffects(EffectCause.SPAWN, e);
 		}
@@ -37,15 +36,14 @@ public class EntityListener implements Listener {
 
 	@EventHandler(ignoreCancelled = true)
 	public void entityDeath(EntityDeathEvent e) {
-		GenesisLivingEntity gle = manager.getEntityConfig(e.getEntity()
-				.getUniqueId());
+		GenesisLivingEntity gle = manager.getEntityConfig(e.getEntity().getUniqueId());
 		if (gle != null) {
 			gle.triggerEffects(EffectCause.DEATH, e);
-			List <Drops> drops = gle.getRandomDrop();
+			List<Drops> drops = gle.getRandomDrop();
 			if (drops != null) {
-				List <ItemStack> actualDrops = e.getDrops();
+				List<ItemStack> actualDrops = e.getDrops();
 				actualDrops.clear();
-				for(Drops d : drops) {
+				for (Drops d : drops) {
 					actualDrops.add(d.getRandomDrop());
 				}
 			}
@@ -54,8 +52,7 @@ public class EntityListener implements Listener {
 
 	@EventHandler(ignoreCancelled = true)
 	public void entityHitPlayer(EntityDamageByEntityEvent e) {
-		GenesisLivingEntity gle = manager.getEntityConfig(e.getEntity()
-				.getUniqueId());
+		GenesisLivingEntity gle = manager.getEntityConfig(e.getEntity().getUniqueId());
 		if (gle != null) {
 			if (e.getDamager() instanceof Projectile) {
 				gle.triggerEffects(EffectCause.GET_HIT_RANGE, e);
@@ -67,10 +64,9 @@ public class EntityListener implements Listener {
 		boolean projectile = false;
 		if (damager instanceof Projectile) {
 			if (((Projectile) damager).getShooter() instanceof LivingEntity) {
-				damager = (LivingEntity)(((Projectile) damager).getShooter());
+				damager = (LivingEntity) (((Projectile) damager).getShooter());
 				projectile = true;
-			}
-			else {
+			} else {
 				damager = null;
 			}
 		}
@@ -79,8 +75,7 @@ public class EntityListener implements Listener {
 			if (gleDamager != null) {
 				if (projectile) {
 					gle.triggerEffects(EffectCause.HIT_PLAYER_RANGED, e);
-				}
-				else {
+				} else {
 					gle.triggerEffects(EffectCause.HIT_PLAYER_MELEE, e);
 				}
 			}
