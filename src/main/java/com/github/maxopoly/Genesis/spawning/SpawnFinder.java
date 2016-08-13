@@ -1,5 +1,6 @@
 package com.github.maxopoly.Genesis.spawning;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -11,6 +12,8 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import vg.civcraft.mc.civmodcore.areas.IArea;
@@ -21,6 +24,7 @@ import com.github.maxopoly.Genesis.entities.GenesisLivingEntity;
 public class SpawnFinder implements Runnable {
 
 	private static List<BlockFace> cardinalDirections;
+	private static Random rng;
 
 	private List<Material> blocksToSpawnOn;
 	private List<Material> blocksNotToSpawnOn;
@@ -28,6 +32,7 @@ public class SpawnFinder implements Runnable {
 
 	private List<IArea> spawnAreas;
 	private int chunkSpawnRange;
+	private double minimumPlayerDistance;
 
 	private int minimumLightLevelRequired;
 	private int maximumLightLevelAllowed;
@@ -43,14 +48,14 @@ public class SpawnFinder implements Runnable {
 
 	private List<GenesisLivingEntity> entities;
 
-	private Random rng;
 	private int PID;
 	private long spawnDelay;
 
 	public SpawnFinder(List<Material> blocksToSpawnOn, List<Material> blocksNotToSpawnOn,
 			List<Material> blocksToSpawnIn, List<IArea> spawnAreas, int chunkSpawnRange, int minimumLightLevelRequired,
 			int maximumLightLevelAllowed, int spawnInSpaceUpwards, int extraSpawnInSpaceSidewards, int attempts,
-			int minimumY, int maximumY, double spawnChance, List<GenesisLivingEntity> entities, long spawnDelay) {
+			int minimumY, int maximumY, double spawnChance, List<GenesisLivingEntity> entities, long spawnDelay,
+			double minimumPlayerDistance) {
 		this.blocksNotToSpawnOn = blocksNotToSpawnOn;
 		this.blocksToSpawnIn = blocksToSpawnIn;
 		this.blocksToSpawnOn = blocksToSpawnOn;
@@ -64,31 +69,66 @@ public class SpawnFinder implements Runnable {
 		this.maximumY = maximumY;
 		this.spawnAreas = spawnAreas;
 		this.chunkSpawnRange = chunkSpawnRange;
-		this.rng = new Random();
 		this.entities = entities;
+		this.minimumPlayerDistance = minimumPlayerDistance;
 		if (cardinalDirections == null) {
-			cardinalDirections = new LinkedList<BlockFace>();
+			// first initialization
+			cardinalDirections = new ArrayList<BlockFace>();
 			cardinalDirections.add(BlockFace.NORTH);
 			cardinalDirections.add(BlockFace.EAST);
 			cardinalDirections.add(BlockFace.SOUTH);
 			cardinalDirections.add(BlockFace.WEST);
+			rng = new Random();
 		}
 		this.spawnDelay = spawnDelay;
 		this.PID = Bukkit.getScheduler().scheduleSyncRepeatingTask(Genesis.getInstance(), this, spawnDelay, spawnDelay);
 	}
 
+	/**
+	 * Runnable that keeps spawning mobs around players. Each round for every
+	 * players, who is within the specified area for this instance, a random
+	 * number between 0 and 1 is rolled, which has to be lower than spawnChance
+	 * so the spawningAttempt is continued. If it is, a chunk will be randomly
+	 * picked, which is a maximum of chunkSpawnRange away in x and z coordinate
+	 * and not the chunk the player is in, unless chunkSpawnRange is set to 0.
+	 * 
+	 * The weight for the chunk chosen will be determined for the primary entity
+	 * spawned by this instance (first one listed in the config) and based on
+	 * the weight a spawn chance between 0 and 1 is calculated by:
+	 * 
+	 * 1 + e ^ (currentWeight / spawnModifier)
+	 * 
+	 * , where e is the euler number, currentWeight is the current weight of the
+	 * primary entity in the chosen chunk and spawnModifier is the
+	 * spawnChanceModifier of the primary entity. The higher the weight is, the
+	 * closer this number get to 1, so a randomly chosen number between 0 and 1
+	 * has to bigger than the current chance to allow spawns to happen. If the
+	 * random numbers allow an entity to spawn, a random x and z within the
+	 * chunk are chosen and a valid y is searched for at those coordinates,
+	 * which fulfills all the other criteria specified. If one is found, the
+	 * entities are spawned there and the weight is increased
+	 */
 	@Override
 	public void run() {
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			Location playerLoc = p.getLocation();
 			for (IArea area : spawnAreas) {
 				if (area.isInArea(playerLoc)) {
+					if (rng.nextDouble() > spawnChance) {
+						return;
+					}
 					Chunk c = playerLoc.getWorld().getChunkAt(
 							(int) (playerLoc.getChunk().getX() + (Math.round((rng.nextDouble() - 0.5) * 2.0
 									* chunkSpawnRange))),
 							(int) (playerLoc.getChunk().getZ() + (Math.round((rng.nextDouble() - 0.5) * 2.0
 									* chunkSpawnRange))));
-					attemptToSpawn(c);
+					GenesisLivingEntity primaryEntity = entities.get(0);
+					int currentWeight = Genesis.getManager().getWeightStorage()
+							.getWeightForChunk(c.getWorld().getUID(), c.getX(), c.getZ(), primaryEntity);
+					if (rng.nextDouble() > 1 - Math.exp(-(((double) currentWeight) / primaryEntity
+							.getSpawnChanceModifier()))) {
+						attemptToSpawn(c);
+					}
 					break;
 				}
 			}
@@ -96,9 +136,6 @@ public class SpawnFinder implements Runnable {
 	}
 
 	public void attemptToSpawn(Chunk c) {
-		if (rng.nextDouble() > spawnChance) {
-			return;
-		}
 		for (int i = 0; i < attempts; i++) {
 			Location loc = findLocation(c.getWorld(), c.getX() * 16 + rng.nextInt(16), c.getZ() * 16 + rng.nextInt(16));
 			if (loc != null) {
@@ -108,12 +145,37 @@ public class SpawnFinder implements Runnable {
 		}
 	}
 
+	/**
+	 * Directly spawns all entities being spawned by this instance in the given
+	 * location without performing any additional checks at all
+	 * 
+	 * @param loc
+	 *            Location to spawn in
+	 */
 	public void spawnEntities(Location loc) {
 		for (GenesisLivingEntity gle : entities) {
+			Genesis.getManager()
+					.getWeightStorage()
+					.increaseWeightForChunk(loc.getWorld().getUID(), loc.getChunk().getX(), loc.getChunk().getZ(), gle,
+							1);
 			gle.spawnAt(loc);
 		}
 	}
 
+	/**
+	 * Attempts to find a valid y-level which fulfills all the criterias
+	 * specified in this instance in the given world at the given x and z
+	 * coordinates
+	 * 
+	 * @param w
+	 *            World to spawn in
+	 * @param x
+	 *            X-coordinate to spawn at
+	 * @param z
+	 *            Z-coordinate to spawn at
+	 * @return Complete location to spawn in or null if no valid location was
+	 *         found
+	 */
 	public Location findLocation(World w, int x, int z) {
 		List<Integer> validY = new LinkedList<Integer>();
 		int foundRange = 0;
@@ -139,9 +201,22 @@ public class SpawnFinder implements Runnable {
 					foundRange = 0;
 					continue;
 				}
-				// if we are at first block above the solid, check for light
+				// if we are at first block above the solid, check for light and
+				// distance to players
 				if (foundRange == 1) {
 					if (b.getLightLevel() > maximumLightLevelAllowed || b.getLightLevel() < minimumLightLevelRequired) {
+						foundRange = 0;
+						continue;
+					}
+					boolean farEnoughAwayFromPlayers = true;
+					for (Entity entity : w.getNearbyEntities(b.getLocation(), minimumPlayerDistance,
+							minimumPlayerDistance, minimumPlayerDistance)) {
+						if (entity.getType() == EntityType.PLAYER) {
+							farEnoughAwayFromPlayers = false;
+							break;
+						}
+					}
+					if (!farEnoughAwayFromPlayers) {
 						foundRange = 0;
 						continue;
 					}

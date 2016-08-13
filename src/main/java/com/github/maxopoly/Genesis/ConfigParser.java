@@ -55,6 +55,7 @@ import com.github.maxopoly.Genesis.spawning.SpawnFinder;
 public class ConfigParser {
 
 	private Genesis plugin;
+	private Map <String, GenesisLivingEntity> parsedEntities;
 
 	public ConfigParser(Genesis plugin) {
 		this.plugin = plugin;
@@ -65,6 +66,7 @@ public class ConfigParser {
 		plugin.saveDefaultConfig();
 		plugin.reloadConfig();
 		FileConfiguration config = plugin.getConfig();
+		parsedEntities = parseEntities(config.getConfigurationSection("entities"));
 		parseSpawnFinders(config.getConfigurationSection("spawns"));
 		boolean disableNormalSpawns = config.getBoolean("disableNaturalSpawns", false);
 		if (disableNormalSpawns) {
@@ -115,29 +117,42 @@ public class ConfigParser {
 			int minimumY = current.getInt("minimumY", 0);
 			int maximumY = current.getInt("maximumY", 255);
 			double spawnChance = current.getDouble("spawnChance", 1.0);
-			List<GenesisLivingEntity> entities = parseEntities(current.getConfigurationSection("entities"));
-			if (entities == null) {
+			double minimumPlayerDistance = current.getDouble("minimumPlayerDistance", 8.0);
+			List <String> entityNames = current.getStringList("entities");
+			if (entityNames == null || entityNames.size() == 0) {
 				plugin.warning("Failed to parse entities at " + current.getCurrentPath() + ". Skipping it");
 				continue;
 			}
+			List <GenesisLivingEntity> entities = new ArrayList<GenesisLivingEntity>();
+			for(String entityName : entityNames) {
+				GenesisLivingEntity gle = parsedEntities.get(entityName);
+				if (gle == null) {
+					plugin.warning("Entity " + entityName + " was specified at " + current.getCurrentPath() + ", but not such entity was specified in the config. It was skipped");
+					continue;
+				}
+				entities.add(gle);
+			}
+			if (entities.size() == 0) {
+				plugin.warning("Found no valid entities for spawning config at " + current.getCurrentPath() + ". It was skipped.");
+				continue;
+			}
 			long spawnDelay = ConfigParsing.parseTime(current.getString("spawnDelay", "1m"));
-			// default once a minute
 
 			Genesis.getManager()
 					.registerSpawnFinder(
 							new SpawnFinder(blocksToSpawnOn, blocksNotToSpawnOn, blocksToSpawnIn, spawnAreas,
 									chunkSpawnRange, minimumLightLevelRequired, maximumLightLevelAllowed,
 									spawnInSpaceUpwards, extraSpawnInSpaceSidewards, attempts, minimumY, maximumY,
-									spawnChance, entities, spawnDelay));
+									spawnChance, entities, spawnDelay, minimumPlayerDistance));
 		}
 	}
 
-	public List<GenesisLivingEntity> parseEntities(ConfigurationSection config) {
+	public Map <String, GenesisLivingEntity> parseEntities(ConfigurationSection config) {
 		if (config == null) {
 			plugin.warning("No entities specified in config");
 			return null;
 		}
-		List<GenesisLivingEntity> entities = new ArrayList<GenesisLivingEntity>();
+		Map <String, GenesisLivingEntity> entities = new TreeMap<String, GenesisLivingEntity>();
 		for (String key : config.getKeys(false)) {
 			ConfigurationSection current = config.getConfigurationSection(key);
 			if (current == null) {
@@ -419,7 +434,7 @@ public class ConfigParser {
 				break;
 			}
 			if (result != null) {
-				entities.add(result);
+				entities.put(result.getUniqueTag(), result);
 			}
 		}
 		return entities;

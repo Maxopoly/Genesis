@@ -13,7 +13,7 @@ import com.github.maxopoly.Genesis.combatEffects.EffectCause;
 import com.github.maxopoly.Genesis.misc.Drops;
 import com.github.maxopoly.Genesis.misc.RandomSelector;
 
-public abstract class GenesisLivingEntity {
+public abstract class GenesisLivingEntity implements Comparable<GenesisLivingEntity> {
 
 	private EntityType entityType;
 	private String customName;
@@ -23,6 +23,9 @@ public abstract class GenesisLivingEntity {
 	private Map<EffectCause, List<CombatEffect>> effects;
 
 	private String uniqueTag;
+	
+	private int spawnChanceModifier;
+	private long spawningWeightTimer;
 
 	public GenesisLivingEntity(EntityType entityType, String uniqueTag, String customName,
 			Map<List<Drops>, Double> drops, Map<EffectCause, List<CombatEffect>> effects) {
@@ -74,5 +77,34 @@ public abstract class GenesisLivingEntity {
 
 	public List<Drops> getRandomDrop() {
 		return selector.pickRandomly(drops);
+	}
+	
+	public void setSpawnChanceModifier(int spawnChanceModifier) {
+		this.spawnChanceModifier = spawnChanceModifier;
+	}
+	
+	public int getSpawnChanceModifier() {
+		return spawnChanceModifier;
+	}
+	
+	public void setSpawningWeightTimer(long timer) {
+		this.spawningWeightTimer = timer;
+	}
+	
+	public long getSpawningWeightTimer() {
+		return spawningWeightTimer;
+	}
+
+	@Override
+	public int compareTo(GenesisLivingEntity other) {
+		if (other == null) {
+			return -1;
+		}
+		return getUniqueTag().compareTo(other.getUniqueTag());
+	}
+	
+	@Override
+	public int hashCode() {
+		return getUniqueTag().hashCode();
 	}
 }

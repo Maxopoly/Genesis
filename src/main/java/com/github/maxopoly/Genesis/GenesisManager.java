@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.bukkit.entity.LivingEntity;
 
 import com.github.maxopoly.Genesis.entities.GenesisLivingEntity;
+import com.github.maxopoly.Genesis.spawning.ChunkWeightStorage;
 import com.github.maxopoly.Genesis.spawning.SpawnFinder;
 
 public class GenesisManager {
@@ -17,11 +18,13 @@ public class GenesisManager {
 	private Map<UUID, GenesisLivingEntity> entities;
 	private Map<String, GenesisLivingEntity> configsByIdentifier;
 	private List<SpawnFinder> spawns;
+	private ChunkWeightStorage weightStorage;
 
 	public GenesisManager() {
 		this.entities = new TreeMap<UUID, GenesisLivingEntity>();
 		this.configsByIdentifier = new HashMap<String, GenesisLivingEntity>();
 		this.spawns = new ArrayList<SpawnFinder>();
+		this.weightStorage = new ChunkWeightStorage();
 	}
 
 	public GenesisLivingEntity getEntityConfig(UUID uuid) {
@@ -46,6 +49,10 @@ public class GenesisManager {
 
 	public void registerSpawnFinder(SpawnFinder sf) {
 		this.spawns.add(sf);
+	}
+	
+	public ChunkWeightStorage getWeightStorage() {
+		return weightStorage;
 	}
 
 }
